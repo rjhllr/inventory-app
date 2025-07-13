@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'dart:io';
 
 import '../data/app_database.dart';
 import '../view_models/scanning_vm.dart';
-import '../providers.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
   final String productId;
@@ -181,6 +181,74 @@ class ProductDetailScreen extends ConsumerWidget {
           );
         },
       ),
+
+      // Photo gallery section
+      FutureBuilder<List<String>>(
+        future: ref.read(scanningVmProvider).getPhotosForProduct(productId),
+        builder: (context, snapshot) {
+          final photos = snapshot.data ?? [];
+          
+          if (photos.isEmpty) {
+            return const SizedBox.shrink();
+          }
+          
+          return Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Photos',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 120,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: photos.length,
+                      itemBuilder: (context, index) {
+                        final photoPath = photos[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: GestureDetector(
+                            onTap: () => _showPhotoViewer(context, photos, index),
+                            child: Container(
+                              width: 120,
+                              height: 120,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey[300]!),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: File(photoPath).existsSync()
+                                    ? Image.file(
+                                        File(photoPath),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Container(
+                                        color: Colors.grey[200],
+                                        child: const Icon(
+                                          Icons.broken_image,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
       
       // Transaction history header
       Padding(
@@ -301,6 +369,65 @@ class ProductDetailScreen extends ConsumerWidget {
             child: const Text('Close'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showPhotoViewer(BuildContext context, List<String> photos, int initialIndex) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.black,
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.9,
+            maxWidth: MediaQuery.of(context).size.width * 0.9,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppBar(
+                title: Text('Photo ${initialIndex + 1} of ${photos.length}'),
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+                automaticallyImplyLeading: false,
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              Expanded(
+                child: PageView.builder(
+                  controller: PageController(initialPage: initialIndex),
+                  itemCount: photos.length,
+                  itemBuilder: (context, index) {
+                    final photoPath = photos[index];
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      child: Center(
+                        child: File(photoPath).existsSync()
+                            ? Image.file(
+                                File(photoPath),
+                                fit: BoxFit.contain,
+                              )
+                            : Container(
+                                color: Colors.grey[200],
+                                child: const Icon(
+                                  Icons.broken_image,
+                                  color: Colors.grey,
+                                  size: 64,
+                                ),
+                              ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

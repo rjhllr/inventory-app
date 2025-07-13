@@ -190,6 +190,33 @@ class ScanningVm {
     );
     return question.label;
   }
+
+  /// Helper method to get all photos for a product
+  Future<List<String>> getPhotosForProduct(String productId) async {
+    final dataSource = ref.read(dataSourceProvider);
+    final questions = await ref.read(promptQuestionsProvider.future);
+    final photoQuestions = questions.where((q) => q.inputType == 'photo').toList();
+    
+    final allPhotos = <String>[];
+    
+    for (final question in photoQuestions) {
+      final transactions = await dataSource.watchTransactionsForProduct(productId).first;
+      
+      for (final transaction in transactions) {
+        final answers = await dataSource.getAnswersMapForTransaction(transaction.id);
+        if (answers.containsKey(question.id)) {
+          final photoValue = answers[question.id]!;
+          if (photoValue.isNotEmpty) {
+            // Photos are stored as comma-separated paths
+            final photoPaths = photoValue.split(',');
+            allPhotos.addAll(photoPaths);
+          }
+        }
+      }
+    }
+    
+    return allPhotos;
+  }
 }
 
 final scanningVmProvider = Provider<ScanningVm>((ref) => ScanningVm(ref));
@@ -200,4 +227,16 @@ final transactionsStreamProvider = StreamProvider.autoDispose<List<Transaction>>
 
 final productTransactionsStreamProvider = StreamProvider.autoDispose.family<List<Transaction>, String>((ref, productId) {
   return ref.watch(dataSourceProvider).watchTransactionsForProduct(productId);
+});
+
+// Provider for effective count at a specific transaction
+final effectiveCountAtTransactionProvider = FutureProvider.autoDispose.family<int, ({String productId, DateTime timestamp})>((ref, params) async {
+  final scanningVm = ref.watch(scanningVmProvider);
+  return await scanningVm.calculateEffectiveCountAtTransaction(params.productId, params.timestamp);
+});
+
+// Provider for categorized answers for a transaction
+final categorizedAnswersProvider = FutureProvider.autoDispose.family<Map<String, Map<String, String>>, String>((ref, transactionId) async {
+  final scanningVm = ref.watch(scanningVmProvider);
+  return await scanningVm.categorizeAnswersForTransaction(transactionId);
 }); 

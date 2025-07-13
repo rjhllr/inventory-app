@@ -9,6 +9,8 @@ import 'screens/scanning_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/upgrades_screen.dart';
 import 'screens/reset_stocks_screen.dart';
+import 'screens/prompt_screen.dart';
+import 'data/app_database.dart';
 
 final appRouter = GoRouter(
   routes: [
@@ -21,6 +23,18 @@ final appRouter = GoRouter(
           path: 'scan',
           name: 'scan',
           builder: (context, state) => const ScanningScreen(),
+        ),
+        GoRoute(
+          path: 'prompt',
+          name: 'prompt',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>;
+            return PromptScreen(
+              productCode: extra['productCode'] as String,
+              questions: extra['questions'] as List<PromptQuestion>,
+              promptForQuantity: extra['promptForQuantity'] as bool,
+            );
+          },
         ),
         GoRoute(
           path: 'reset-stocks',

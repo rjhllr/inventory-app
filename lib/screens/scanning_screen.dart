@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/app_database.dart';
-import '../providers.dart';
 import '../view_models/scanning_vm.dart';
 import '../view_models/settings_vm.dart';
 
@@ -49,7 +49,6 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
 
     final scanningVm = ref.read(scanningVmProvider);
     final settingsVm = ref.read(settingsVmProvider);
-    final contextForDialog = context;
     final requiredPrompts = await scanningVm.getPromptsForCode(code);
     final quantityPrompt = settingsVm.isQuantityPromptEnabled;
 
@@ -57,27 +56,19 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
       // No prompts needed, just save and continue
       await scanningVm.saveTransaction(code: code, quantity: 1, answers: {});
     } else {
-      // Show dialog to collect info
+      // Navigate to prompt screen to collect info
       if (!mounted) return;
-      final results = await showDialog<Map<String, dynamic>>(
-        context: contextForDialog,
-        barrierDismissible: false,
-        builder: (_) => ProviderScope(
-          child: _PromptDialog(
-            productCode: code,
-            questions: requiredPrompts,
-            promptForQuantity: quantityPrompt,
-          ),
-        ),
+      await context.pushNamed(
+        'prompt',
+        extra: {
+          'productCode': code,
+          'questions': requiredPrompts,
+          'promptForQuantity': quantityPrompt,
+        },
       );
 
-      if (results != null) {
-        await scanningVm.saveTransaction(
-          code: code,
-          quantity: results['quantity'] as int,
-          answers: results['answers'] as Map<String, String>,
-        );
-      }
+      // If the user completed the prompts, no need to do anything
+      // as the prompt screen handles saving
     }
 
     // Resume scanning after a delay
@@ -148,110 +139,156 @@ class _TransactionTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return FutureBuilder<List<dynamic>>(
-      future: Future.wait([
-        ref.read(scanningVmProvider).calculateEffectiveCountAtTransaction(
-          transaction.productId,
-          transaction.timestamp,
-        ),
-        ref.read(scanningVmProvider).categorizeAnswersForTransaction(transaction.id),
-      ]),
-      builder: (context, snapshot) {
-        final effectiveCount = snapshot.data?[0] ?? 0;
-        final categorizedAnswers = snapshot.data?[1] as Map<String, Map<String, String>>? ?? {};
-        
-        final perScanAnswers = categorizedAnswers['per_scan'] ?? {};
-        final onceAnswers = categorizedAnswers['once'] ?? {};
-        
-        final isPositive = effectiveCount > 0;
-        final isNegative = effectiveCount < 0;
+    // Use providers to watch data instead of FutureBuilder
+    final effectiveCountAsync = ref.watch(effectiveCountAtTransactionProvider(
+      (productId: transaction.productId, timestamp: transaction.timestamp)
+    ));
+    final categorizedAnswersAsync = ref.watch(categorizedAnswersProvider(transaction.id));
+    
+    return effectiveCountAsync.when(
+      data: (effectiveCount) {
+        return categorizedAnswersAsync.when(
+          data: (categorizedAnswers) {
+            final perScanAnswers = categorizedAnswers['per_scan'] ?? {};
+            final onceAnswers = categorizedAnswers['once'] ?? {};
+            
+            final isPositive = effectiveCount > 0;
+            final isNegative = effectiveCount < 0;
 
-        return ListTile(
-          onTap: onTap,
-          title: Text(transaction.productId),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(transaction.timestamp.toLocal().toString()),
-              // Show per-scan attributes
-              if (perScanAnswers.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                FutureBuilder<List<String>>(
-                  future: Future.wait(perScanAnswers.entries.map((entry) async {
-                    final label = await ref.read(scanningVmProvider).getQuestionLabel(entry.key);
-                    return '$label: ${entry.value}';
-                  })),
-                  builder: (context, attrSnapshot) {
-                    if (attrSnapshot.hasData) {
-                      return Text(
-                        attrSnapshot.data!.join(', '),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.blue[600],
-                          fontWeight: FontWeight.w500,
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ],
-              // Show "once" attributes with small text for subsequent scans
-              if (onceAnswers.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                FutureBuilder<List<String>>(
-                  future: Future.wait(onceAnswers.entries.map((entry) async {
-                    final label = await ref.read(scanningVmProvider).getQuestionLabel(entry.key);
-                    return '$label: ${entry.value}';
-                  })),
-                  builder: (context, attrSnapshot) {
-                    if (attrSnapshot.hasData) {
-                      return Text(
-                        attrSnapshot.data!.join(', '),
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey[600],
-                          fontStyle: FontStyle.italic,
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ],
-            ],
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('${transaction.quantity > 0 ? '+' : ''}${transaction.quantity}'),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: isPositive
-                      ? Colors.green.withValues(alpha: 0.1)
-                      : isNegative
-                          ? Colors.red.withValues(alpha: 0.1)
-                          : Colors.grey.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  effectiveCount.toString(),
-                  style: TextStyle(
-                    color: isPositive
-                        ? Colors.green
-                        : isNegative
-                            ? Colors.red
-                            : Colors.grey,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+            return ListTile(
+              onTap: onTap,
+              title: Text(transaction.productId),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(transaction.timestamp.toLocal().toString()),
+                  // Show per-scan attributes
+                  if (perScanAnswers.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    _AnswerLabelsWidget(
+                      answers: perScanAnswers,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.blue[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                  // Show "once" attributes with small text for subsequent scans
+                  if (onceAnswers.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    _AnswerLabelsWidget(
+                      answers: onceAnswers,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey[600],
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ],
               ),
-            ],
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('${transaction.quantity > 0 ? '+' : ''}${transaction.quantity}'),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: isPositive
+                          ? Colors.green.withValues(alpha: 0.1)
+                          : isNegative
+                              ? Colors.red.withValues(alpha: 0.1)
+                              : Colors.grey.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      effectiveCount.toString(),
+                      style: TextStyle(
+                        color: isPositive
+                            ? Colors.green
+                            : isNegative
+                                ? Colors.red
+                                : Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+          loading: () => ListTile(
+            title: Text(transaction.productId),
+            subtitle: Text(transaction.timestamp.toLocal().toString()),
+            trailing: const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+          error: (error, stackTrace) => ListTile(
+            title: Text(transaction.productId),
+            subtitle: Text(transaction.timestamp.toLocal().toString()),
+            trailing: const Icon(Icons.error, color: Colors.red),
           ),
         );
       },
+      loading: () => ListTile(
+        title: Text(transaction.productId),
+        subtitle: Text(transaction.timestamp.toLocal().toString()),
+        trailing: const SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
+      error: (error, stackTrace) => ListTile(
+        title: Text(transaction.productId),
+        subtitle: Text(transaction.timestamp.toLocal().toString()),
+        trailing: const Icon(Icons.error, color: Colors.red),
+      ),
+    );
+  }
+}
+
+// Helper widget for displaying answer labels
+class _AnswerLabelsWidget extends ConsumerWidget {
+  final Map<String, String> answers;
+  final TextStyle style;
+
+  const _AnswerLabelsWidget({
+    required this.answers,
+    required this.style,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final questionsAsync = ref.watch(promptQuestionsProvider);
+    
+    return questionsAsync.when(
+      data: (questions) {
+        final labels = answers.entries.map((entry) {
+          final question = questions.firstWhere(
+            (q) => q.id == entry.key,
+            orElse: () => PromptQuestion(
+              id: entry.key,
+              label: entry.key,
+              inputType: 'text',
+              askMode: 'once',
+              prefillLastInput: false,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
+          );
+          return '${question.label}: ${entry.value}';
+        }).toList();
+        
+        return Text(labels.join(', '), style: style);
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (error, stackTrace) => const SizedBox.shrink(),
     );
   }
 }
@@ -479,217 +516,3 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-class _PromptDialog extends ConsumerStatefulWidget {
-  final String productCode;
-  final List<PromptQuestion> questions;
-  final bool promptForQuantity;
-
-  const _PromptDialog({
-    required this.productCode,
-    required this.questions,
-    required this.promptForQuantity,
-  });
-
-  @override
-  ConsumerState<_PromptDialog> createState() => _PromptDialogState();
-}
-
-class _PromptDialogState extends ConsumerState<_PromptDialog> {
-  final _formKey = GlobalKey<FormState>();
-  final Map<String, String> _answers = {};
-  final Map<String, dynamic> _initialValues = {};
-  bool _isLoading = true;
-  int _quantity = 1;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchInitialValues();
-  }
-
-  Future<void> _fetchInitialValues() async {
-    final dataSource = ref.read(dataSourceProvider);
-    for (final q in widget.questions) {
-      if (q.prefillLastInput) {
-        final lastAnswer = await dataSource.getLastAnswerForQuestion(q.id);
-        if (lastAnswer != null) {
-          if (q.inputType == 'date') {
-            _initialValues[q.id] = DateTime.tryParse(lastAnswer.value);
-          } else {
-            _initialValues[q.id] = lastAnswer.value;
-          }
-        }
-      }
-    }
-    setState(() => _isLoading = false);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Loading...'),
-          ],
-        ),
-      );
-    }
-
-    return AlertDialog(
-      title: Text('Product: ${widget.productCode}'),
-      content: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (widget.promptForQuantity) ...[
-                TextFormField(
-                  initialValue: _quantity.toString(),
-                  decoration: const InputDecoration(labelText: 'Quantity'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a quantity';
-                    }
-                    if (int.tryParse(value) == null) {
-                      return 'Please enter a valid number';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) => _quantity = int.parse(value ?? '1'),
-                ),
-                const SizedBox(height: 16),
-              ],
-              ...widget.questions.map((question) {
-                switch (question.inputType) {
-                  case 'number':
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: TextFormField(
-                        initialValue: _initialValues[question.id]?.toString(),
-                        decoration: InputDecoration(labelText: question.label),
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a value';
-                          }
-                          if (double.tryParse(value) == null) {
-                            return 'Please enter a valid number';
-                          }
-                          return null;
-                        },
-                        onSaved: (value) => _answers[question.id] = value ?? '',
-                      ),
-                    );
-                  case 'text':
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: TextFormField(
-                        initialValue: _initialValues[question.id]?.toString(),
-                        decoration: InputDecoration(labelText: question.label),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a value';
-                          }
-                          return null;
-                        },
-                        onSaved: (value) => _answers[question.id] = value ?? '',
-                      ),
-                    );
-                  case 'date':
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: _DateField(
-                        label: question.label,
-                        initialValue: _initialValues[question.id] as DateTime?,
-                        onSaved: (value) => _answers[question.id] = value.toIso8601String(),
-                      ),
-                    );
-                  default:
-                    return const SizedBox.shrink();
-                }
-              }),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              _formKey.currentState!.save();
-              Navigator.of(context).pop({
-                'quantity': _quantity,
-                'answers': _answers,
-              });
-            }
-          },
-          child: const Text('Save'),
-        ),
-      ],
-    );
-  }
-}
-
-class _DateField extends StatefulWidget {
-  final String label;
-  final DateTime? initialValue;
-  final Function(DateTime) onSaved;
-
-  const _DateField({
-    required this.label,
-    this.initialValue,
-    required this.onSaved,
-  });
-
-  @override
-  State<_DateField> createState() => _DateFieldState();
-}
-
-class _DateFieldState extends State<_DateField> {
-  DateTime? _selectedDate;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedDate = widget.initialValue;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () async {
-        final date = await showDatePicker(
-          context: context,
-          initialDate: _selectedDate ?? DateTime.now(),
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2100),
-        );
-        if (date != null) {
-          setState(() => _selectedDate = date);
-          widget.onSaved(date);
-        }
-      },
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: widget.label,
-          suffixIcon: const Icon(Icons.calendar_today),
-        ),
-        child: Text(
-          _selectedDate != null
-              ? DateFormat.yMd().format(_selectedDate!)
-              : 'Select date',
-        ),
-      ),
-    );
-  }
-} 
