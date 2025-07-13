@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../data/app_database.dart';
 import '../view_models/scanning_vm.dart';
 
 class ScanResultsScreen extends ConsumerWidget {
@@ -9,10 +10,10 @@ class ScanResultsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final scansAsync = ref.watch(scansStreamProvider);
+    final transactionsAsync = ref.watch(transactionsStreamProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scan Results'),
+        title: const Text('Transaction History'),
         actions: [
           IconButton(
             icon: const Icon(Icons.share),
@@ -25,19 +26,67 @@ class ScanResultsScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: scansAsync.when(
-        data: (scans) {
-           if (scans.isEmpty) {
-            return const Center(child: Text('No scans recorded yet.'));
+      body: transactionsAsync.when(
+        data: (transactions) {
+          if (transactions.isEmpty) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.history, size: 64, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text(
+                    'No transactions recorded yet',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Start scanning products to see transaction history',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            );
           }
+
+          // Group transactions by product
+          final groupedTransactions = <String, List<Transaction>>{};
+          for (final transaction in transactions) {
+            groupedTransactions.putIfAbsent(transaction.productId, () => []).add(transaction);
+          }
+
           return ListView.builder(
-            itemCount: scans.length,
+            itemCount: transactions.length,
             itemBuilder: (context, index) {
-              final scan = scans[index];
-              return ListTile(
-                title: Text(scan.productId),
-                subtitle: Text(DateFormat.yMd().add_jms().format(scan.timestamp.toLocal())),
-                trailing: Text('Quantity: ${scan.quantity}'),
+              final transaction = transactions[index];
+              final isPositive = transaction.quantity > 0;
+              
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: isPositive ? Colors.green : Colors.red,
+                    child: Icon(
+                      isPositive ? Icons.add : Icons.remove,
+                      color: Colors.white,
+                    ),
+                  ),
+                  title: Text(
+                    transaction.productId,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  subtitle: Text(
+                    DateFormat.yMd().add_jms().format(transaction.timestamp.toLocal()),
+                  ),
+                  trailing: Text(
+                    '${transaction.quantity > 0 ? '+' : ''}${transaction.quantity}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: isPositive ? Colors.green : Colors.red,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
               );
             },
           );

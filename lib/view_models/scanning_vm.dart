@@ -21,10 +21,10 @@ class ScanningVm {
       attributesJson: const Value(null),
     ));
 
-    // Add scan entry
-    final scanId = _uuid.v4();
-    await dataSource.addScan(ScansCompanion(
-      id: Value(scanId),
+    // Add transaction entry
+    final transactionId = _uuid.v4();
+    await dataSource.addTransaction(TransactionsCompanion(
+      id: Value(transactionId),
       productId: Value(code),
       quantity: Value(quantity),
     ));
@@ -48,13 +48,13 @@ class ScanningVm {
     return prompts;
   }
 
-  Future<void> saveScan({
+  Future<void> saveTransaction({
     required String code,
     required int quantity,
     required Map<String, String> answers,
   }) async {
     final dataSource = ref.read(dataSourceProvider);
-    final scanId = _uuid.v4();
+    final transactionId = _uuid.v4();
     
     // Ensure product exists (upsert)
     await dataSource.upsertProduct(ProductsCompanion(
@@ -62,8 +62,8 @@ class ScanningVm {
       attributesJson: const Value(null),
     ));
     
-    final scan = ScansCompanion(
-      id: Value(scanId),
+    final transaction = TransactionsCompanion(
+      id: Value(transactionId),
       productId: Value(code),
       quantity: Value(quantity),
     );
@@ -71,14 +71,14 @@ class ScanningVm {
     final answerCompanions = answers.entries.map((entry) {
       return PromptAnswersCompanion(
         id: Value(_uuid.v4()),
-        scanId: Value(scanId),
+        transactionId: Value(transactionId),
         questionId: Value(entry.key),
         value: Value(entry.value),
       );
     }).toList();
 
-    await dataSource.addScanWithAnswers(
-      scan: scan,
+    await dataSource.addTransactionWithAnswers(
+      transaction: transaction,
       answers: answerCompanions,
     );
   }
@@ -86,6 +86,10 @@ class ScanningVm {
 
 final scanningVmProvider = Provider<ScanningVm>((ref) => ScanningVm(ref));
 
-final scansStreamProvider = StreamProvider.autoDispose<List<Scan>>((ref) {
-  return ref.watch(dataSourceProvider).watchScans();
+final transactionsStreamProvider = StreamProvider.autoDispose<List<Transaction>>((ref) {
+  return ref.watch(dataSourceProvider).watchTransactions();
+});
+
+final productTransactionsStreamProvider = StreamProvider.autoDispose.family<List<Transaction>, String>((ref, productId) {
+  return ref.watch(dataSourceProvider).watchTransactionsForProduct(productId);
 }); 

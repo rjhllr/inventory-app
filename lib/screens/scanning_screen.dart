@@ -37,7 +37,7 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
 
     if (requiredPrompts.isEmpty && !quantityPrompt) {
       // No prompts needed, just save and continue
-      await scanningVm.saveScan(code: code, quantity: 1, answers: {});
+      await scanningVm.saveTransaction(code: code, quantity: 1, answers: {});
     } else {
       // Show dialog to collect info
       final results = await showDialog<Map<String, dynamic>>(
@@ -54,7 +54,7 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
       );
 
       if (results != null) {
-        await scanningVm.saveScan(
+        await scanningVm.saveTransaction(
           code: code,
           quantity: results['quantity'] as int,
           answers: results['answers'] as Map<String, String>,
@@ -70,7 +70,7 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final scansAsync = ref.watch(scansStreamProvider);
+    final transactionsAsync = ref.watch(transactionsStreamProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Scanning')),
@@ -84,19 +84,19 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
             ),
           ),
           const Divider(height: 1),
-          // Recent scans list
+          // Recent transactions list
           Expanded(
             flex: 2,
-            child: scansAsync.when(
-              data: (scans) => ListView.builder(
+            child: transactionsAsync.when(
+              data: (transactions) => ListView.builder(
                 reverse: true,
-                itemCount: scans.length,
+                itemCount: transactions.length,
                 itemBuilder: (context, index) {
-                  final scan = scans[index];
+                  final transaction = transactions[index];
                   return ListTile(
-                    title: Text(scan.productId),
-                    subtitle: Text(scan.timestamp.toLocal().toString()),
-                    trailing: Text('x${scan.quantity}'),
+                    title: Text(transaction.productId),
+                    subtitle: Text(transaction.timestamp.toLocal().toString()),
+                    trailing: Text('${transaction.quantity > 0 ? '+' : ''}${transaction.quantity}'),
                   );
                 },
               ),
@@ -159,61 +159,102 @@ class _PromptDialogState extends ConsumerState<_PromptDialog> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const AlertDialog(
-        content: Center(child: CircularProgressIndicator()),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Loading...'),
+          ],
+        ),
       );
     }
 
     return AlertDialog(
-      title: Text('Data for ${widget.productCode}'),
+      title: Text('Product: ${widget.productCode}'),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (widget.promptForQuantity)
+              if (widget.promptForQuantity) ...[
                 TextFormField(
-                  initialValue: '1',
+                  initialValue: _quantity.toString(),
                   decoration: const InputDecoration(labelText: 'Quantity'),
                   keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  validator: (v) => v == null || v.isEmpty || int.parse(v) < 1
-                      ? 'Must be > 0'
-                      : null,
-                  onSaved: (v) => _quantity = int.parse(v!),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a quantity';
+                    }
+                    if (int.tryParse(value) == null) {
+                      return 'Please enter a valid number';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => _quantity = int.parse(value!),
                 ),
-              ...widget.questions.map(
-                (q) {
-                  if (q.inputType == 'date') {
-                    return _DatePickerField(
-                      label: q.label,
-                      initialValue: _initialValues[q.id] as DateTime?,
-                      onSaved: (date) {
-                        if (date != null) {
-                          _answers[q.id] = date.toIso8601String();
-                        }
-                      },
-                      validator: (date) => date == null ? 'Required' : null,
+                const SizedBox(height: 16),
+              ],
+              ...widget.questions.map((question) {
+                switch (question.inputType) {
+                  case 'number':
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: TextFormField(
+                        initialValue: _initialValues[question.id]?.toString(),
+                        decoration: InputDecoration(labelText: question.label),
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a value';
+                          }
+                          if (double.tryParse(value) == null) {
+                            return 'Please enter a valid number';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) => _answers[question.id] = value!,
+                      ),
                     );
-                  }
-                  return TextFormField(
-                    initialValue: _initialValues[q.id] as String?,
-                    decoration: InputDecoration(labelText: q.label),
-                    validator: (v) => v!.isEmpty ? 'Required' : null,
-                    onSaved: (v) => _answers[q.id] = v!,
-                    keyboardType: q.inputType == 'number'
-                        ? TextInputType.number
-                        : TextInputType.text,
-                  );
-                },
-              ),
+                  case 'text':
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: TextFormField(
+                        initialValue: _initialValues[question.id]?.toString(),
+                        decoration: InputDecoration(labelText: question.label),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a value';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) => _answers[question.id] = value!,
+                      ),
+                    );
+                  case 'date':
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: _DateField(
+                        label: question.label,
+                        initialValue: _initialValues[question.id] as DateTime?,
+                        onSaved: (value) => _answers[question.id] = value!.toIso8601String(),
+                      ),
+                    );
+                  default:
+                    return const SizedBox.shrink();
+                }
+              }),
             ],
           ),
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
-        FilledButton(
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
           onPressed: () {
             if (_formKey.currentState!.validate()) {
               _formKey.currentState!.save();
@@ -230,49 +271,56 @@ class _PromptDialogState extends ConsumerState<_PromptDialog> {
   }
 }
 
-class _DatePickerField extends FormField<DateTime> {
-  _DatePickerField({
-    Key? key,
-    required String label,
-    required FormFieldSetter<DateTime> onSaved,
-    FormFieldValidator<DateTime>? validator,
-    DateTime? initialValue,
-  }) : super(
-          key: key,
-          onSaved: onSaved,
-          validator: validator,
-          initialValue: initialValue,
-          builder: (FormFieldState<DateTime> state) {
-            return InkWell(
-              onTap: () async {
-                final DateTime? picked = await showDatePicker(
-                  context: state.context,
-                  initialDate: state.value ?? DateTime.now(),
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2101),
-                );
-                if (picked != null) {
-                  state.didChange(picked);
-                }
-              },
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  labelText: label,
-                  errorText: state.errorText,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      state.value != null
-                          ? DateFormat.yMd().format(state.value!)
-                          : 'Select date',
-                    ),
-                    const Icon(Icons.calendar_today),
-                  ],
-                ),
-              ),
-            );
-          },
+class _DateField extends StatefulWidget {
+  final String label;
+  final DateTime? initialValue;
+  final Function(DateTime) onSaved;
+
+  const _DateField({
+    required this.label,
+    this.initialValue,
+    required this.onSaved,
+  });
+
+  @override
+  State<_DateField> createState() => _DateFieldState();
+}
+
+class _DateFieldState extends State<_DateField> {
+  DateTime? _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = widget.initialValue;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        final date = await showDatePicker(
+          context: context,
+          initialDate: _selectedDate ?? DateTime.now(),
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2100),
         );
+        if (date != null) {
+          setState(() => _selectedDate = date);
+          widget.onSaved(date);
+        }
+      },
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: widget.label,
+          suffixIcon: const Icon(Icons.calendar_today),
+        ),
+        child: Text(
+          _selectedDate != null
+              ? DateFormat.yMd().format(_selectedDate!)
+              : 'Select date',
+        ),
+      ),
+    );
+  }
 } 

@@ -16,7 +16,7 @@ class Products extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-class Scans extends Table {
+class Transactions extends Table {
   TextColumn get id => text()();
   TextColumn get productId => text().references(Products, #id, onDelete: KeyAction.cascade)();
   DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
@@ -41,7 +41,7 @@ class PromptQuestions extends Table {
 
 class PromptAnswers extends Table {
   TextColumn get id => text()();
-  TextColumn get scanId => text().references(Scans, #id, onDelete: KeyAction.cascade)();
+  TextColumn get transactionId => text().references(Transactions, #id, onDelete: KeyAction.cascade)();
   TextColumn get questionId => text().references(PromptQuestions, #id, onDelete: KeyAction.cascade)();
   TextColumn get value => text()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
@@ -50,12 +50,12 @@ class PromptAnswers extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Products, Scans, PromptQuestions, PromptAnswers])
+@DriftDatabase(tables: [Products, Transactions, PromptQuestions, PromptAnswers])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 }
 
 LazyDatabase _openConnection() {

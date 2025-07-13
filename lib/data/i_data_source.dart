@@ -4,13 +4,14 @@ abstract class IDataSource {
   // Products
   Future<void> upsertProduct(ProductsCompanion product);
   Stream<List<Product>> watchProducts();
-  Stream<List<Product>> watchProductsWithScans();
+  Stream<List<Product>> watchProductsWithTransactions();
 
-  // Scans
-  Future<void> addScan(ScansCompanion scan);
-  Stream<List<Scan>> watchScans();
-  Future<void> deleteAllScans();
-  Future<void> deleteScansForProduct(String productId);
+  // Transactions
+  Future<void> addTransaction(TransactionsCompanion transaction);
+  Stream<List<Transaction>> watchTransactions();
+  Stream<List<Transaction>> watchTransactionsForProduct(String productId);
+  Future<void> deleteAllTransactions();
+  Future<void> deleteTransactionsForProduct(String productId);
   
   // Prompt Questions
   Stream<List<PromptQuestion>> watchPromptQuestions();
@@ -19,8 +20,8 @@ abstract class IDataSource {
  
   // Prompt Answers
   Future<bool> hasAnswerForProduct(String productId, String questionId);
-  Future<void> addScanWithAnswers(
-      {required ScansCompanion scan,
+  Future<void> addTransactionWithAnswers(
+      {required TransactionsCompanion transaction,
       required List<PromptAnswersCompanion> answers});
   Future<PromptAnswer?> getLastAnswerForQuestion(String questionId);
 } 

@@ -278,11 +278,12 @@ class ProductsCompanion extends UpdateCompanion<Product> {
   }
 }
 
-class $ScansTable extends Scans with TableInfo<$ScansTable, Scan> {
+class $TransactionsTable extends Transactions
+    with TableInfo<$TransactionsTable, Transaction> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ScansTable(this.attachedDatabase, [this._alias]);
+  $TransactionsTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
@@ -336,9 +337,9 @@ class $ScansTable extends Scans with TableInfo<$ScansTable, Scan> {
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'scans';
+  static const String $name = 'transactions';
   @override
-  VerificationContext validateIntegrity(Insertable<Scan> instance,
+  VerificationContext validateIntegrity(Insertable<Transaction> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -375,9 +376,9 @@ class $ScansTable extends Scans with TableInfo<$ScansTable, Scan> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Scan map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Transaction map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Scan(
+    return Transaction(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       productId: attachedDatabase.typeMapping
@@ -394,19 +395,19 @@ class $ScansTable extends Scans with TableInfo<$ScansTable, Scan> {
   }
 
   @override
-  $ScansTable createAlias(String alias) {
-    return $ScansTable(attachedDatabase, alias);
+  $TransactionsTable createAlias(String alias) {
+    return $TransactionsTable(attachedDatabase, alias);
   }
 }
 
-class Scan extends DataClass implements Insertable<Scan> {
+class Transaction extends DataClass implements Insertable<Transaction> {
   final String id;
   final String productId;
   final DateTime timestamp;
   final int quantity;
   final DateTime createdAt;
   final DateTime updatedAt;
-  const Scan(
+  const Transaction(
       {required this.id,
       required this.productId,
       required this.timestamp,
@@ -425,8 +426,8 @@ class Scan extends DataClass implements Insertable<Scan> {
     return map;
   }
 
-  ScansCompanion toCompanion(bool nullToAbsent) {
-    return ScansCompanion(
+  TransactionsCompanion toCompanion(bool nullToAbsent) {
+    return TransactionsCompanion(
       id: Value(id),
       productId: Value(productId),
       timestamp: Value(timestamp),
@@ -436,10 +437,10 @@ class Scan extends DataClass implements Insertable<Scan> {
     );
   }
 
-  factory Scan.fromJson(Map<String, dynamic> json,
+  factory Transaction.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Scan(
+    return Transaction(
       id: serializer.fromJson<String>(json['id']),
       productId: serializer.fromJson<String>(json['productId']),
       timestamp: serializer.fromJson<DateTime>(json['timestamp']),
@@ -461,14 +462,14 @@ class Scan extends DataClass implements Insertable<Scan> {
     };
   }
 
-  Scan copyWith(
+  Transaction copyWith(
           {String? id,
           String? productId,
           DateTime? timestamp,
           int? quantity,
           DateTime? createdAt,
           DateTime? updatedAt}) =>
-      Scan(
+      Transaction(
         id: id ?? this.id,
         productId: productId ?? this.productId,
         timestamp: timestamp ?? this.timestamp,
@@ -476,8 +477,8 @@ class Scan extends DataClass implements Insertable<Scan> {
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
       );
-  Scan copyWithCompanion(ScansCompanion data) {
-    return Scan(
+  Transaction copyWithCompanion(TransactionsCompanion data) {
+    return Transaction(
       id: data.id.present ? data.id.value : this.id,
       productId: data.productId.present ? data.productId.value : this.productId,
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
@@ -489,7 +490,7 @@ class Scan extends DataClass implements Insertable<Scan> {
 
   @override
   String toString() {
-    return (StringBuffer('Scan(')
+    return (StringBuffer('Transaction(')
           ..write('id: $id, ')
           ..write('productId: $productId, ')
           ..write('timestamp: $timestamp, ')
@@ -506,7 +507,7 @@ class Scan extends DataClass implements Insertable<Scan> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Scan &&
+      (other is Transaction &&
           other.id == this.id &&
           other.productId == this.productId &&
           other.timestamp == this.timestamp &&
@@ -515,7 +516,7 @@ class Scan extends DataClass implements Insertable<Scan> {
           other.updatedAt == this.updatedAt);
 }
 
-class ScansCompanion extends UpdateCompanion<Scan> {
+class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<String> id;
   final Value<String> productId;
   final Value<DateTime> timestamp;
@@ -523,7 +524,7 @@ class ScansCompanion extends UpdateCompanion<Scan> {
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
-  const ScansCompanion({
+  const TransactionsCompanion({
     this.id = const Value.absent(),
     this.productId = const Value.absent(),
     this.timestamp = const Value.absent(),
@@ -532,7 +533,7 @@ class ScansCompanion extends UpdateCompanion<Scan> {
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  ScansCompanion.insert({
+  TransactionsCompanion.insert({
     required String id,
     required String productId,
     this.timestamp = const Value.absent(),
@@ -542,7 +543,7 @@ class ScansCompanion extends UpdateCompanion<Scan> {
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         productId = Value(productId);
-  static Insertable<Scan> custom({
+  static Insertable<Transaction> custom({
     Expression<String>? id,
     Expression<String>? productId,
     Expression<DateTime>? timestamp,
@@ -562,7 +563,7 @@ class ScansCompanion extends UpdateCompanion<Scan> {
     });
   }
 
-  ScansCompanion copyWith(
+  TransactionsCompanion copyWith(
       {Value<String>? id,
       Value<String>? productId,
       Value<DateTime>? timestamp,
@@ -570,7 +571,7 @@ class ScansCompanion extends UpdateCompanion<Scan> {
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
       Value<int>? rowid}) {
-    return ScansCompanion(
+    return TransactionsCompanion(
       id: id ?? this.id,
       productId: productId ?? this.productId,
       timestamp: timestamp ?? this.timestamp,
@@ -610,7 +611,7 @@ class ScansCompanion extends UpdateCompanion<Scan> {
 
   @override
   String toString() {
-    return (StringBuffer('ScansCompanion(')
+    return (StringBuffer('TransactionsCompanion(')
           ..write('id: $id, ')
           ..write('productId: $productId, ')
           ..write('timestamp: $timestamp, ')
@@ -1020,14 +1021,15 @@ class $PromptAnswersTable extends PromptAnswers
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _scanIdMeta = const VerificationMeta('scanId');
+  static const VerificationMeta _transactionIdMeta =
+      const VerificationMeta('transactionId');
   @override
-  late final GeneratedColumn<String> scanId = GeneratedColumn<String>(
-      'scan_id', aliasedName, false,
+  late final GeneratedColumn<String> transactionId = GeneratedColumn<String>(
+      'transaction_id', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'REFERENCES scans (id) ON DELETE CASCADE'));
+          'REFERENCES transactions (id) ON DELETE CASCADE'));
   static const VerificationMeta _questionIdMeta =
       const VerificationMeta('questionId');
   @override
@@ -1060,7 +1062,7 @@ class $PromptAnswersTable extends PromptAnswers
       defaultValue: currentDateAndTime);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, scanId, questionId, value, createdAt, updatedAt];
+      [id, transactionId, questionId, value, createdAt, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1076,11 +1078,13 @@ class $PromptAnswersTable extends PromptAnswers
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (data.containsKey('scan_id')) {
-      context.handle(_scanIdMeta,
-          scanId.isAcceptableOrUnknown(data['scan_id']!, _scanIdMeta));
+    if (data.containsKey('transaction_id')) {
+      context.handle(
+          _transactionIdMeta,
+          transactionId.isAcceptableOrUnknown(
+              data['transaction_id']!, _transactionIdMeta));
     } else if (isInserting) {
-      context.missing(_scanIdMeta);
+      context.missing(_transactionIdMeta);
     }
     if (data.containsKey('question_id')) {
       context.handle(
@@ -1115,8 +1119,8 @@ class $PromptAnswersTable extends PromptAnswers
     return PromptAnswer(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      scanId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}scan_id'])!,
+      transactionId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}transaction_id'])!,
       questionId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}question_id'])!,
       value: attachedDatabase.typeMapping
@@ -1136,14 +1140,14 @@ class $PromptAnswersTable extends PromptAnswers
 
 class PromptAnswer extends DataClass implements Insertable<PromptAnswer> {
   final String id;
-  final String scanId;
+  final String transactionId;
   final String questionId;
   final String value;
   final DateTime createdAt;
   final DateTime updatedAt;
   const PromptAnswer(
       {required this.id,
-      required this.scanId,
+      required this.transactionId,
       required this.questionId,
       required this.value,
       required this.createdAt,
@@ -1152,7 +1156,7 @@ class PromptAnswer extends DataClass implements Insertable<PromptAnswer> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['scan_id'] = Variable<String>(scanId);
+    map['transaction_id'] = Variable<String>(transactionId);
     map['question_id'] = Variable<String>(questionId);
     map['value'] = Variable<String>(value);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -1163,7 +1167,7 @@ class PromptAnswer extends DataClass implements Insertable<PromptAnswer> {
   PromptAnswersCompanion toCompanion(bool nullToAbsent) {
     return PromptAnswersCompanion(
       id: Value(id),
-      scanId: Value(scanId),
+      transactionId: Value(transactionId),
       questionId: Value(questionId),
       value: Value(value),
       createdAt: Value(createdAt),
@@ -1176,7 +1180,7 @@ class PromptAnswer extends DataClass implements Insertable<PromptAnswer> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PromptAnswer(
       id: serializer.fromJson<String>(json['id']),
-      scanId: serializer.fromJson<String>(json['scanId']),
+      transactionId: serializer.fromJson<String>(json['transactionId']),
       questionId: serializer.fromJson<String>(json['questionId']),
       value: serializer.fromJson<String>(json['value']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -1188,7 +1192,7 @@ class PromptAnswer extends DataClass implements Insertable<PromptAnswer> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'scanId': serializer.toJson<String>(scanId),
+      'transactionId': serializer.toJson<String>(transactionId),
       'questionId': serializer.toJson<String>(questionId),
       'value': serializer.toJson<String>(value),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -1198,14 +1202,14 @@ class PromptAnswer extends DataClass implements Insertable<PromptAnswer> {
 
   PromptAnswer copyWith(
           {String? id,
-          String? scanId,
+          String? transactionId,
           String? questionId,
           String? value,
           DateTime? createdAt,
           DateTime? updatedAt}) =>
       PromptAnswer(
         id: id ?? this.id,
-        scanId: scanId ?? this.scanId,
+        transactionId: transactionId ?? this.transactionId,
         questionId: questionId ?? this.questionId,
         value: value ?? this.value,
         createdAt: createdAt ?? this.createdAt,
@@ -1214,7 +1218,9 @@ class PromptAnswer extends DataClass implements Insertable<PromptAnswer> {
   PromptAnswer copyWithCompanion(PromptAnswersCompanion data) {
     return PromptAnswer(
       id: data.id.present ? data.id.value : this.id,
-      scanId: data.scanId.present ? data.scanId.value : this.scanId,
+      transactionId: data.transactionId.present
+          ? data.transactionId.value
+          : this.transactionId,
       questionId:
           data.questionId.present ? data.questionId.value : this.questionId,
       value: data.value.present ? data.value.value : this.value,
@@ -1227,7 +1233,7 @@ class PromptAnswer extends DataClass implements Insertable<PromptAnswer> {
   String toString() {
     return (StringBuffer('PromptAnswer(')
           ..write('id: $id, ')
-          ..write('scanId: $scanId, ')
+          ..write('transactionId: $transactionId, ')
           ..write('questionId: $questionId, ')
           ..write('value: $value, ')
           ..write('createdAt: $createdAt, ')
@@ -1238,13 +1244,13 @@ class PromptAnswer extends DataClass implements Insertable<PromptAnswer> {
 
   @override
   int get hashCode =>
-      Object.hash(id, scanId, questionId, value, createdAt, updatedAt);
+      Object.hash(id, transactionId, questionId, value, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is PromptAnswer &&
           other.id == this.id &&
-          other.scanId == this.scanId &&
+          other.transactionId == this.transactionId &&
           other.questionId == this.questionId &&
           other.value == this.value &&
           other.createdAt == this.createdAt &&
@@ -1253,7 +1259,7 @@ class PromptAnswer extends DataClass implements Insertable<PromptAnswer> {
 
 class PromptAnswersCompanion extends UpdateCompanion<PromptAnswer> {
   final Value<String> id;
-  final Value<String> scanId;
+  final Value<String> transactionId;
   final Value<String> questionId;
   final Value<String> value;
   final Value<DateTime> createdAt;
@@ -1261,7 +1267,7 @@ class PromptAnswersCompanion extends UpdateCompanion<PromptAnswer> {
   final Value<int> rowid;
   const PromptAnswersCompanion({
     this.id = const Value.absent(),
-    this.scanId = const Value.absent(),
+    this.transactionId = const Value.absent(),
     this.questionId = const Value.absent(),
     this.value = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -1270,19 +1276,19 @@ class PromptAnswersCompanion extends UpdateCompanion<PromptAnswer> {
   });
   PromptAnswersCompanion.insert({
     required String id,
-    required String scanId,
+    required String transactionId,
     required String questionId,
     required String value,
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
-        scanId = Value(scanId),
+        transactionId = Value(transactionId),
         questionId = Value(questionId),
         value = Value(value);
   static Insertable<PromptAnswer> custom({
     Expression<String>? id,
-    Expression<String>? scanId,
+    Expression<String>? transactionId,
     Expression<String>? questionId,
     Expression<String>? value,
     Expression<DateTime>? createdAt,
@@ -1291,7 +1297,7 @@ class PromptAnswersCompanion extends UpdateCompanion<PromptAnswer> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (scanId != null) 'scan_id': scanId,
+      if (transactionId != null) 'transaction_id': transactionId,
       if (questionId != null) 'question_id': questionId,
       if (value != null) 'value': value,
       if (createdAt != null) 'created_at': createdAt,
@@ -1302,7 +1308,7 @@ class PromptAnswersCompanion extends UpdateCompanion<PromptAnswer> {
 
   PromptAnswersCompanion copyWith(
       {Value<String>? id,
-      Value<String>? scanId,
+      Value<String>? transactionId,
       Value<String>? questionId,
       Value<String>? value,
       Value<DateTime>? createdAt,
@@ -1310,7 +1316,7 @@ class PromptAnswersCompanion extends UpdateCompanion<PromptAnswer> {
       Value<int>? rowid}) {
     return PromptAnswersCompanion(
       id: id ?? this.id,
-      scanId: scanId ?? this.scanId,
+      transactionId: transactionId ?? this.transactionId,
       questionId: questionId ?? this.questionId,
       value: value ?? this.value,
       createdAt: createdAt ?? this.createdAt,
@@ -1325,8 +1331,8 @@ class PromptAnswersCompanion extends UpdateCompanion<PromptAnswer> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
-    if (scanId.present) {
-      map['scan_id'] = Variable<String>(scanId.value);
+    if (transactionId.present) {
+      map['transaction_id'] = Variable<String>(transactionId.value);
     }
     if (questionId.present) {
       map['question_id'] = Variable<String>(questionId.value);
@@ -1350,7 +1356,7 @@ class PromptAnswersCompanion extends UpdateCompanion<PromptAnswer> {
   String toString() {
     return (StringBuffer('PromptAnswersCompanion(')
           ..write('id: $id, ')
-          ..write('scanId: $scanId, ')
+          ..write('transactionId: $transactionId, ')
           ..write('questionId: $questionId, ')
           ..write('value: $value, ')
           ..write('createdAt: $createdAt, ')
@@ -1365,7 +1371,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $ProductsTable products = $ProductsTable(this);
-  late final $ScansTable scans = $ScansTable(this);
+  late final $TransactionsTable transactions = $TransactionsTable(this);
   late final $PromptQuestionsTable promptQuestions =
       $PromptQuestionsTable(this);
   late final $PromptAnswersTable promptAnswers = $PromptAnswersTable(this);
@@ -1374,7 +1380,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [products, scans, promptQuestions, promptAnswers];
+      [products, transactions, promptQuestions, promptAnswers];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
         [
@@ -1382,11 +1388,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
             on: TableUpdateQuery.onTableName('products',
                 limitUpdateKind: UpdateKind.delete),
             result: [
-              TableUpdate('scans', kind: UpdateKind.delete),
+              TableUpdate('transactions', kind: UpdateKind.delete),
             ],
           ),
           WritePropagation(
-            on: TableUpdateQuery.onTableName('scans',
+            on: TableUpdateQuery.onTableName('transactions',
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('prompt_answers', kind: UpdateKind.delete),
@@ -1422,16 +1428,17 @@ final class $$ProductsTableReferences
     extends BaseReferences<_$AppDatabase, $ProductsTable, Product> {
   $$ProductsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static MultiTypedResultKey<$ScansTable, List<Scan>> _scansRefsTable(
-          _$AppDatabase db) =>
-      MultiTypedResultKey.fromTable(db.scans,
-          aliasName: $_aliasNameGenerator(db.products.id, db.scans.productId));
+  static MultiTypedResultKey<$TransactionsTable, List<Transaction>>
+      _transactionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+          db.transactions,
+          aliasName:
+              $_aliasNameGenerator(db.products.id, db.transactions.productId));
 
-  $$ScansTableProcessedTableManager get scansRefs {
-    final manager = $$ScansTableTableManager($_db, $_db.scans)
+  $$TransactionsTableProcessedTableManager get transactionsRefs {
+    final manager = $$TransactionsTableTableManager($_db, $_db.transactions)
         .filter((f) => f.productId.id.sqlEquals($_itemColumn<String>('id')!));
 
-    final cache = $_typedResult.readTableOrNull(_scansRefsTable($_db));
+    final cache = $_typedResult.readTableOrNull(_transactionsRefsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -1459,19 +1466,19 @@ class $$ProductsTableFilterComposer
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnFilters(column));
 
-  Expression<bool> scansRefs(
-      Expression<bool> Function($$ScansTableFilterComposer f) f) {
-    final $$ScansTableFilterComposer composer = $composerBuilder(
+  Expression<bool> transactionsRefs(
+      Expression<bool> Function($$TransactionsTableFilterComposer f) f) {
+    final $$TransactionsTableFilterComposer composer = $composerBuilder(
         composer: this,
         getCurrentColumn: (t) => t.id,
-        referencedTable: $db.scans,
+        referencedTable: $db.transactions,
         getReferencedColumn: (t) => t.productId,
         builder: (joinBuilder,
                 {$addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer}) =>
-            $$ScansTableFilterComposer(
+            $$TransactionsTableFilterComposer(
               $db: $db,
-              $table: $db.scans,
+              $table: $db.transactions,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -1525,19 +1532,19 @@ class $$ProductsTableAnnotationComposer
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
-  Expression<T> scansRefs<T extends Object>(
-      Expression<T> Function($$ScansTableAnnotationComposer a) f) {
-    final $$ScansTableAnnotationComposer composer = $composerBuilder(
+  Expression<T> transactionsRefs<T extends Object>(
+      Expression<T> Function($$TransactionsTableAnnotationComposer a) f) {
+    final $$TransactionsTableAnnotationComposer composer = $composerBuilder(
         composer: this,
         getCurrentColumn: (t) => t.id,
-        referencedTable: $db.scans,
+        referencedTable: $db.transactions,
         getReferencedColumn: (t) => t.productId,
         builder: (joinBuilder,
                 {$addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer}) =>
-            $$ScansTableAnnotationComposer(
+            $$TransactionsTableAnnotationComposer(
               $db: $db,
-              $table: $db.scans,
+              $table: $db.transactions,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -1558,7 +1565,7 @@ class $$ProductsTableTableManager extends RootTableManager<
     $$ProductsTableUpdateCompanionBuilder,
     (Product, $$ProductsTableReferences),
     Product,
-    PrefetchHooks Function({bool scansRefs})> {
+    PrefetchHooks Function({bool transactionsRefs})> {
   $$ProductsTableTableManager(_$AppDatabase db, $ProductsTable table)
       : super(TableManagerState(
           db: db,
@@ -1601,20 +1608,22 @@ class $$ProductsTableTableManager extends RootTableManager<
               .map((e) =>
                   (e.readTable(table), $$ProductsTableReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({scansRefs = false}) {
+          prefetchHooksCallback: ({transactionsRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [if (scansRefs) db.scans],
+              explicitlyWatchedTables: [if (transactionsRefs) db.transactions],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
                 return [
-                  if (scansRefs)
-                    await $_getPrefetchedData<Product, $ProductsTable, Scan>(
+                  if (transactionsRefs)
+                    await $_getPrefetchedData<Product, $ProductsTable,
+                            Transaction>(
                         currentTable: table,
-                        referencedTable:
-                            $$ProductsTableReferences._scansRefsTable(db),
+                        referencedTable: $$ProductsTableReferences
+                            ._transactionsRefsTable(db),
                         managerFromTypedResult: (p0) =>
-                            $$ProductsTableReferences(db, table, p0).scansRefs,
+                            $$ProductsTableReferences(db, table, p0)
+                                .transactionsRefs,
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.productId == item.id),
@@ -1637,8 +1646,9 @@ typedef $$ProductsTableProcessedTableManager = ProcessedTableManager<
     $$ProductsTableUpdateCompanionBuilder,
     (Product, $$ProductsTableReferences),
     Product,
-    PrefetchHooks Function({bool scansRefs})>;
-typedef $$ScansTableCreateCompanionBuilder = ScansCompanion Function({
+    PrefetchHooks Function({bool transactionsRefs})>;
+typedef $$TransactionsTableCreateCompanionBuilder = TransactionsCompanion
+    Function({
   required String id,
   required String productId,
   Value<DateTime> timestamp,
@@ -1647,7 +1657,8 @@ typedef $$ScansTableCreateCompanionBuilder = ScansCompanion Function({
   Value<DateTime> updatedAt,
   Value<int> rowid,
 });
-typedef $$ScansTableUpdateCompanionBuilder = ScansCompanion Function({
+typedef $$TransactionsTableUpdateCompanionBuilder = TransactionsCompanion
+    Function({
   Value<String> id,
   Value<String> productId,
   Value<DateTime> timestamp,
@@ -1657,12 +1668,13 @@ typedef $$ScansTableUpdateCompanionBuilder = ScansCompanion Function({
   Value<int> rowid,
 });
 
-final class $$ScansTableReferences
-    extends BaseReferences<_$AppDatabase, $ScansTable, Scan> {
-  $$ScansTableReferences(super.$_db, super.$_table, super.$_typedResult);
+final class $$TransactionsTableReferences
+    extends BaseReferences<_$AppDatabase, $TransactionsTable, Transaction> {
+  $$TransactionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $ProductsTable _productIdTable(_$AppDatabase db) => db.products
-      .createAlias($_aliasNameGenerator(db.scans.productId, db.products.id));
+  static $ProductsTable _productIdTable(_$AppDatabase db) =>
+      db.products.createAlias(
+          $_aliasNameGenerator(db.transactions.productId, db.products.id));
 
   $$ProductsTableProcessedTableManager get productId {
     final $_column = $_itemColumn<String>('product_id')!;
@@ -1678,12 +1690,13 @@ final class $$ScansTableReferences
   static MultiTypedResultKey<$PromptAnswersTable, List<PromptAnswer>>
       _promptAnswersRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.promptAnswers,
-              aliasName:
-                  $_aliasNameGenerator(db.scans.id, db.promptAnswers.scanId));
+              aliasName: $_aliasNameGenerator(
+                  db.transactions.id, db.promptAnswers.transactionId));
 
   $$PromptAnswersTableProcessedTableManager get promptAnswersRefs {
     final manager = $$PromptAnswersTableTableManager($_db, $_db.promptAnswers)
-        .filter((f) => f.scanId.id.sqlEquals($_itemColumn<String>('id')!));
+        .filter(
+            (f) => f.transactionId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_promptAnswersRefsTable($_db));
     return ProcessedTableManager(
@@ -1691,8 +1704,9 @@ final class $$ScansTableReferences
   }
 }
 
-class $$ScansTableFilterComposer extends Composer<_$AppDatabase, $ScansTable> {
-  $$ScansTableFilterComposer({
+class $$TransactionsTableFilterComposer
+    extends Composer<_$AppDatabase, $TransactionsTable> {
+  $$TransactionsTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -1740,7 +1754,7 @@ class $$ScansTableFilterComposer extends Composer<_$AppDatabase, $ScansTable> {
         composer: this,
         getCurrentColumn: (t) => t.id,
         referencedTable: $db.promptAnswers,
-        getReferencedColumn: (t) => t.scanId,
+        getReferencedColumn: (t) => t.transactionId,
         builder: (joinBuilder,
                 {$addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer}) =>
@@ -1756,9 +1770,9 @@ class $$ScansTableFilterComposer extends Composer<_$AppDatabase, $ScansTable> {
   }
 }
 
-class $$ScansTableOrderingComposer
-    extends Composer<_$AppDatabase, $ScansTable> {
-  $$ScansTableOrderingComposer({
+class $$TransactionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $TransactionsTable> {
+  $$TransactionsTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -1801,9 +1815,9 @@ class $$ScansTableOrderingComposer
   }
 }
 
-class $$ScansTableAnnotationComposer
-    extends Composer<_$AppDatabase, $ScansTable> {
-  $$ScansTableAnnotationComposer({
+class $$TransactionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TransactionsTable> {
+  $$TransactionsTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -1851,7 +1865,7 @@ class $$ScansTableAnnotationComposer
         composer: this,
         getCurrentColumn: (t) => t.id,
         referencedTable: $db.promptAnswers,
-        getReferencedColumn: (t) => t.scanId,
+        getReferencedColumn: (t) => t.transactionId,
         builder: (joinBuilder,
                 {$addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer}) =>
@@ -1867,28 +1881,28 @@ class $$ScansTableAnnotationComposer
   }
 }
 
-class $$ScansTableTableManager extends RootTableManager<
+class $$TransactionsTableTableManager extends RootTableManager<
     _$AppDatabase,
-    $ScansTable,
-    Scan,
-    $$ScansTableFilterComposer,
-    $$ScansTableOrderingComposer,
-    $$ScansTableAnnotationComposer,
-    $$ScansTableCreateCompanionBuilder,
-    $$ScansTableUpdateCompanionBuilder,
-    (Scan, $$ScansTableReferences),
-    Scan,
+    $TransactionsTable,
+    Transaction,
+    $$TransactionsTableFilterComposer,
+    $$TransactionsTableOrderingComposer,
+    $$TransactionsTableAnnotationComposer,
+    $$TransactionsTableCreateCompanionBuilder,
+    $$TransactionsTableUpdateCompanionBuilder,
+    (Transaction, $$TransactionsTableReferences),
+    Transaction,
     PrefetchHooks Function({bool productId, bool promptAnswersRefs})> {
-  $$ScansTableTableManager(_$AppDatabase db, $ScansTable table)
+  $$TransactionsTableTableManager(_$AppDatabase db, $TransactionsTable table)
       : super(TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$ScansTableFilterComposer($db: db, $table: table),
+              $$TransactionsTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$ScansTableOrderingComposer($db: db, $table: table),
+              $$TransactionsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$ScansTableAnnotationComposer($db: db, $table: table),
+              $$TransactionsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> productId = const Value.absent(),
@@ -1898,7 +1912,7 @@ class $$ScansTableTableManager extends RootTableManager<
             Value<DateTime> updatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
-              ScansCompanion(
+              TransactionsCompanion(
             id: id,
             productId: productId,
             timestamp: timestamp,
@@ -1916,7 +1930,7 @@ class $$ScansTableTableManager extends RootTableManager<
             Value<DateTime> updatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
-              ScansCompanion.insert(
+              TransactionsCompanion.insert(
             id: id,
             productId: productId,
             timestamp: timestamp,
@@ -1926,8 +1940,10 @@ class $$ScansTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) =>
-                  (e.readTable(table), $$ScansTableReferences(db, table, e)))
+              .map((e) => (
+                    e.readTable(table),
+                    $$TransactionsTableReferences(db, table, e)
+                  ))
               .toList(),
           prefetchHooksCallback: (
               {productId = false, promptAnswersRefs = false}) {
@@ -1953,9 +1969,10 @@ class $$ScansTableTableManager extends RootTableManager<
                   state = state.withJoin(
                     currentTable: table,
                     currentColumn: table.productId,
-                    referencedTable: $$ScansTableReferences._productIdTable(db),
+                    referencedTable:
+                        $$TransactionsTableReferences._productIdTable(db),
                     referencedColumn:
-                        $$ScansTableReferences._productIdTable(db).id,
+                        $$TransactionsTableReferences._productIdTable(db).id,
                   ) as T;
                 }
 
@@ -1964,16 +1981,17 @@ class $$ScansTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (promptAnswersRefs)
-                    await $_getPrefetchedData<Scan, $ScansTable, PromptAnswer>(
+                    await $_getPrefetchedData<Transaction, $TransactionsTable,
+                            PromptAnswer>(
                         currentTable: table,
-                        referencedTable:
-                            $$ScansTableReferences._promptAnswersRefsTable(db),
+                        referencedTable: $$TransactionsTableReferences
+                            ._promptAnswersRefsTable(db),
                         managerFromTypedResult: (p0) =>
-                            $$ScansTableReferences(db, table, p0)
+                            $$TransactionsTableReferences(db, table, p0)
                                 .promptAnswersRefs,
-                        referencedItemsForCurrentItem: (item,
-                                referencedItems) =>
-                            referencedItems.where((e) => e.scanId == item.id),
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.transactionId == item.id),
                         typedResults: items)
                 ];
               },
@@ -1982,17 +2000,17 @@ class $$ScansTableTableManager extends RootTableManager<
         ));
 }
 
-typedef $$ScansTableProcessedTableManager = ProcessedTableManager<
+typedef $$TransactionsTableProcessedTableManager = ProcessedTableManager<
     _$AppDatabase,
-    $ScansTable,
-    Scan,
-    $$ScansTableFilterComposer,
-    $$ScansTableOrderingComposer,
-    $$ScansTableAnnotationComposer,
-    $$ScansTableCreateCompanionBuilder,
-    $$ScansTableUpdateCompanionBuilder,
-    (Scan, $$ScansTableReferences),
-    Scan,
+    $TransactionsTable,
+    Transaction,
+    $$TransactionsTableFilterComposer,
+    $$TransactionsTableOrderingComposer,
+    $$TransactionsTableAnnotationComposer,
+    $$TransactionsTableCreateCompanionBuilder,
+    $$TransactionsTableUpdateCompanionBuilder,
+    (Transaction, $$TransactionsTableReferences),
+    Transaction,
     PrefetchHooks Function({bool productId, bool promptAnswersRefs})>;
 typedef $$PromptQuestionsTableCreateCompanionBuilder = PromptQuestionsCompanion
     Function({
@@ -2288,7 +2306,7 @@ typedef $$PromptQuestionsTableProcessedTableManager = ProcessedTableManager<
 typedef $$PromptAnswersTableCreateCompanionBuilder = PromptAnswersCompanion
     Function({
   required String id,
-  required String scanId,
+  required String transactionId,
   required String questionId,
   required String value,
   Value<DateTime> createdAt,
@@ -2298,7 +2316,7 @@ typedef $$PromptAnswersTableCreateCompanionBuilder = PromptAnswersCompanion
 typedef $$PromptAnswersTableUpdateCompanionBuilder = PromptAnswersCompanion
     Function({
   Value<String> id,
-  Value<String> scanId,
+  Value<String> transactionId,
   Value<String> questionId,
   Value<String> value,
   Value<DateTime> createdAt,
@@ -2311,15 +2329,16 @@ final class $$PromptAnswersTableReferences
   $$PromptAnswersTableReferences(
       super.$_db, super.$_table, super.$_typedResult);
 
-  static $ScansTable _scanIdTable(_$AppDatabase db) => db.scans
-      .createAlias($_aliasNameGenerator(db.promptAnswers.scanId, db.scans.id));
+  static $TransactionsTable _transactionIdTable(_$AppDatabase db) =>
+      db.transactions.createAlias($_aliasNameGenerator(
+          db.promptAnswers.transactionId, db.transactions.id));
 
-  $$ScansTableProcessedTableManager get scanId {
-    final $_column = $_itemColumn<String>('scan_id')!;
+  $$TransactionsTableProcessedTableManager get transactionId {
+    final $_column = $_itemColumn<String>('transaction_id')!;
 
-    final manager = $$ScansTableTableManager($_db, $_db.scans)
+    final manager = $$TransactionsTableTableManager($_db, $_db.transactions)
         .filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_scanIdTable($_db));
+    final item = $_typedResult.readTableOrNull(_transactionIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
@@ -2363,18 +2382,18 @@ class $$PromptAnswersTableFilterComposer
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnFilters(column));
 
-  $$ScansTableFilterComposer get scanId {
-    final $$ScansTableFilterComposer composer = $composerBuilder(
+  $$TransactionsTableFilterComposer get transactionId {
+    final $$TransactionsTableFilterComposer composer = $composerBuilder(
         composer: this,
-        getCurrentColumn: (t) => t.scanId,
-        referencedTable: $db.scans,
+        getCurrentColumn: (t) => t.transactionId,
+        referencedTable: $db.transactions,
         getReferencedColumn: (t) => t.id,
         builder: (joinBuilder,
                 {$addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer}) =>
-            $$ScansTableFilterComposer(
+            $$TransactionsTableFilterComposer(
               $db: $db,
-              $table: $db.scans,
+              $table: $db.transactions,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -2425,18 +2444,18 @@ class $$PromptAnswersTableOrderingComposer
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 
-  $$ScansTableOrderingComposer get scanId {
-    final $$ScansTableOrderingComposer composer = $composerBuilder(
+  $$TransactionsTableOrderingComposer get transactionId {
+    final $$TransactionsTableOrderingComposer composer = $composerBuilder(
         composer: this,
-        getCurrentColumn: (t) => t.scanId,
-        referencedTable: $db.scans,
+        getCurrentColumn: (t) => t.transactionId,
+        referencedTable: $db.transactions,
         getReferencedColumn: (t) => t.id,
         builder: (joinBuilder,
                 {$addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer}) =>
-            $$ScansTableOrderingComposer(
+            $$TransactionsTableOrderingComposer(
               $db: $db,
-              $table: $db.scans,
+              $table: $db.transactions,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -2487,18 +2506,18 @@ class $$PromptAnswersTableAnnotationComposer
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
-  $$ScansTableAnnotationComposer get scanId {
-    final $$ScansTableAnnotationComposer composer = $composerBuilder(
+  $$TransactionsTableAnnotationComposer get transactionId {
+    final $$TransactionsTableAnnotationComposer composer = $composerBuilder(
         composer: this,
-        getCurrentColumn: (t) => t.scanId,
-        referencedTable: $db.scans,
+        getCurrentColumn: (t) => t.transactionId,
+        referencedTable: $db.transactions,
         getReferencedColumn: (t) => t.id,
         builder: (joinBuilder,
                 {$addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer}) =>
-            $$ScansTableAnnotationComposer(
+            $$TransactionsTableAnnotationComposer(
               $db: $db,
-              $table: $db.scans,
+              $table: $db.transactions,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -2539,7 +2558,7 @@ class $$PromptAnswersTableTableManager extends RootTableManager<
     $$PromptAnswersTableUpdateCompanionBuilder,
     (PromptAnswer, $$PromptAnswersTableReferences),
     PromptAnswer,
-    PrefetchHooks Function({bool scanId, bool questionId})> {
+    PrefetchHooks Function({bool transactionId, bool questionId})> {
   $$PromptAnswersTableTableManager(_$AppDatabase db, $PromptAnswersTable table)
       : super(TableManagerState(
           db: db,
@@ -2552,7 +2571,7 @@ class $$PromptAnswersTableTableManager extends RootTableManager<
               $$PromptAnswersTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
-            Value<String> scanId = const Value.absent(),
+            Value<String> transactionId = const Value.absent(),
             Value<String> questionId = const Value.absent(),
             Value<String> value = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -2561,7 +2580,7 @@ class $$PromptAnswersTableTableManager extends RootTableManager<
           }) =>
               PromptAnswersCompanion(
             id: id,
-            scanId: scanId,
+            transactionId: transactionId,
             questionId: questionId,
             value: value,
             createdAt: createdAt,
@@ -2570,7 +2589,7 @@ class $$PromptAnswersTableTableManager extends RootTableManager<
           ),
           createCompanionCallback: ({
             required String id,
-            required String scanId,
+            required String transactionId,
             required String questionId,
             required String value,
             Value<DateTime> createdAt = const Value.absent(),
@@ -2579,7 +2598,7 @@ class $$PromptAnswersTableTableManager extends RootTableManager<
           }) =>
               PromptAnswersCompanion.insert(
             id: id,
-            scanId: scanId,
+            transactionId: transactionId,
             questionId: questionId,
             value: value,
             createdAt: createdAt,
@@ -2592,7 +2611,7 @@ class $$PromptAnswersTableTableManager extends RootTableManager<
                     $$PromptAnswersTableReferences(db, table, e)
                   ))
               .toList(),
-          prefetchHooksCallback: ({scanId = false, questionId = false}) {
+          prefetchHooksCallback: ({transactionId = false, questionId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -2609,14 +2628,15 @@ class $$PromptAnswersTableTableManager extends RootTableManager<
                       dynamic,
                       dynamic,
                       dynamic>>(state) {
-                if (scanId) {
+                if (transactionId) {
                   state = state.withJoin(
                     currentTable: table,
-                    currentColumn: table.scanId,
+                    currentColumn: table.transactionId,
                     referencedTable:
-                        $$PromptAnswersTableReferences._scanIdTable(db),
-                    referencedColumn:
-                        $$PromptAnswersTableReferences._scanIdTable(db).id,
+                        $$PromptAnswersTableReferences._transactionIdTable(db),
+                    referencedColumn: $$PromptAnswersTableReferences
+                        ._transactionIdTable(db)
+                        .id,
                   ) as T;
                 }
                 if (questionId) {
@@ -2651,15 +2671,15 @@ typedef $$PromptAnswersTableProcessedTableManager = ProcessedTableManager<
     $$PromptAnswersTableUpdateCompanionBuilder,
     (PromptAnswer, $$PromptAnswersTableReferences),
     PromptAnswer,
-    PrefetchHooks Function({bool scanId, bool questionId})>;
+    PrefetchHooks Function({bool transactionId, bool questionId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
   $$ProductsTableTableManager get products =>
       $$ProductsTableTableManager(_db, _db.products);
-  $$ScansTableTableManager get scans =>
-      $$ScansTableTableManager(_db, _db.scans);
+  $$TransactionsTableTableManager get transactions =>
+      $$TransactionsTableTableManager(_db, _db.transactions);
   $$PromptQuestionsTableTableManager get promptQuestions =>
       $$PromptQuestionsTableTableManager(_db, _db.promptQuestions);
   $$PromptAnswersTableTableManager get promptAnswers =>

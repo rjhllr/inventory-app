@@ -19,36 +19,44 @@ class LocalDbDataSource implements IDataSource {
   }
 
   @override
-  Stream<List<Product>> watchProductsWithScans() {
-    final query = _db.selectOnly(_db.scans, distinct: true)..addColumns([_db.scans.productId]);
+  Stream<List<Product>> watchProductsWithTransactions() {
+    final query = _db.selectOnly(_db.transactions, distinct: true)..addColumns([_db.transactions.productId]);
     
     return query.watch().asyncMap((results) {
-      final productIds = results.map((row) => row.read(_db.scans.productId)).whereType<String>().toList();
+      final productIds = results.map((row) => row.read(_db.transactions.productId)).whereType<String>().toList();
       if (productIds.isEmpty) return Future.value([]);
       return (_db.select(_db.products)..where((p) => p.id.isIn(productIds))).get();
     });
   }
 
   @override
-  Future<void> addScan(ScansCompanion scan) async {
-    await _db.into(_db.scans).insert(scan);
+  Future<void> addTransaction(TransactionsCompanion transaction) async {
+    await _db.into(_db.transactions).insert(transaction);
   }
 
   @override
-  Stream<List<Scan>> watchScans() {
-    final query = _db.select(_db.scans)
+  Stream<List<Transaction>> watchTransactions() {
+    final query = _db.select(_db.transactions)
       ..orderBy([(t) => OrderingTerm.desc(t.timestamp)]);
     return query.watch();
   }
 
   @override
-  Future<void> deleteAllScans() {
-    return _db.delete(_db.scans).go();
+  Stream<List<Transaction>> watchTransactionsForProduct(String productId) {
+    final query = _db.select(_db.transactions)
+      ..where((t) => t.productId.equals(productId))
+      ..orderBy([(t) => OrderingTerm.desc(t.timestamp)]);
+    return query.watch();
   }
 
   @override
-  Future<void> deleteScansForProduct(String productId) {
-    return (_db.delete(_db.scans)..where((t) => t.productId.equals(productId))).go();
+  Future<void> deleteAllTransactions() {
+    return _db.delete(_db.transactions).go();
+  }
+
+  @override
+  Future<void> deleteTransactionsForProduct(String productId) {
+    return (_db.delete(_db.transactions)..where((t) => t.productId.equals(productId))).go();
   }
 
   @override
@@ -71,9 +79,9 @@ class LocalDbDataSource implements IDataSource {
   @override
   Future<bool> hasAnswerForProduct(String productId, String questionId) async {
     final query = _db.select(_db.promptAnswers).join([
-      innerJoin(_db.scans, _db.scans.id.equalsExp(_db.promptAnswers.scanId))
+      innerJoin(_db.transactions, _db.transactions.id.equalsExp(_db.promptAnswers.transactionId))
     ])
-      ..where(_db.scans.productId.equals(productId) &
+      ..where(_db.transactions.productId.equals(productId) &
           _db.promptAnswers.questionId.equals(questionId))
       ..limit(1);
 
@@ -82,11 +90,11 @@ class LocalDbDataSource implements IDataSource {
   }
 
   @override
-  Future<void> addScanWithAnswers(
-      {required ScansCompanion scan,
+  Future<void> addTransactionWithAnswers(
+      {required TransactionsCompanion transaction,
       required List<PromptAnswersCompanion> answers}) async {
     return _db.transaction(() async {
-      await _db.into(_db.scans).insert(scan);
+      await _db.into(_db.transactions).insert(transaction);
       for (final answer in answers) {
         await _db.into(_db.promptAnswers).insert(answer);
       }

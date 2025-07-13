@@ -8,7 +8,7 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final scans = ref.watch(scansStreamProvider);
+    final transactions = ref.watch(transactionsStreamProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -16,34 +16,34 @@ class HomeScreen extends ConsumerWidget {
       ),
       body: ListView(
         children: [
-          _NavTile(
+          const _NavTile(
             label: 'Start Stock-taking',
             routeName: 'scan',
             icon: Icons.qr_code_scanner,
           ),
-                    if (scans.hasValue && scans.value!.isNotEmpty)
-            _NavTile(
+          if (transactions.hasValue && transactions.value!.isNotEmpty)
+            const _NavTile(
               label: 'Reset Stocks',
               routeName: 'reset-stocks',
               icon: Icons.delete_sweep,
             ),
-          _NavTile(
+          const _NavTile(
             label: 'Stock-taking Settings',
             routeName: 'settings',
             icon: Icons.settings,
           ),
-          _NavTile(
+          const _NavTile(
             label: 'Product Database',
             routeName: 'products',
             icon: Icons.storage,
           ),
-          _NavTile(
-            label: 'Scan Results',
+          const _NavTile(
+            label: 'Transaction History',
             routeName: 'results',
             icon: Icons.list_alt,
           ),
           const Divider(),
-          _NavTile(
+          const _NavTile(
             label: 'Upgrades',
             routeName: 'upgrades',
             icon: Icons.star,
