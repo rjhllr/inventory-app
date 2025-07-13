@@ -1,0 +1,6 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # Additional project-specific rules here
+    avoid_print: true 
