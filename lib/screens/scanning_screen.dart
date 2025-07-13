@@ -17,10 +17,33 @@ class ScanningScreen extends ConsumerStatefulWidget {
 }
 
 class _ScanningScreenState extends ConsumerState<ScanningScreen> {
+  late MobileScannerController _controller;
   bool _pause = false;
+  bool _isFlashOn = false;
   String? _lastScannedCode;
   DateTime? _lastScanTime;
   static const Duration _debounceDuration = Duration(seconds: 2);
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = MobileScannerController(
+      torchEnabled: _isFlashOn,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggleFlash() {
+    setState(() {
+      _isFlashOn = !_isFlashOn;
+    });
+    _controller.toggleTorch();
+  }
 
   Future<void> _onDetect(BarcodeCapture capture) async {
     if (_pause) return;
@@ -92,13 +115,26 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
     final transactionsAsync = ref.watch(transactionsStreamProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Scanning')),
+      appBar: AppBar(
+        title: const Text('Scanning'),
+        actions: [
+          IconButton(
+            icon: Icon(
+              _isFlashOn ? Icons.flash_on : Icons.flash_off,
+              color: _isFlashOn ? Colors.yellow : null,
+            ),
+            onPressed: _toggleFlash,
+            tooltip: _isFlashOn ? 'Turn off flash' : 'Turn on flash',
+          ),
+        ],
+      ),
       body: Column(
         children: [
           // Camera preview
           Expanded(
             flex: 3,
             child: MobileScanner(
+              controller: _controller,
               onDetect: _onDetect,
             ),
           ),
