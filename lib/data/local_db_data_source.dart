@@ -60,6 +60,12 @@ class LocalDbDataSource implements IDataSource {
   }
 
   @override
+  Future<void> updateTransactionQuantity(String transactionId, int quantity) async {
+    await (_db.update(_db.transactions)..where((t) => t.id.equals(transactionId)))
+        .write(TransactionsCompanion(quantity: Value(quantity)));
+  }
+
+  @override
   Stream<List<PromptQuestion>> watchPromptQuestions() {
     final query = _db.select(_db.promptQuestions)
       ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]);
@@ -108,5 +114,23 @@ class LocalDbDataSource implements IDataSource {
       ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
       ..limit(1);
     return await query.getSingleOrNull();
+  }
+
+  @override
+  Future<List<PromptAnswer>> getAnswersForTransaction(String transactionId) async {
+    final query = _db.select(_db.promptAnswers)
+      ..where((t) => t.transactionId.equals(transactionId))
+      ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]);
+    return await query.get();
+  }
+
+  @override
+  Future<Map<String, String>> getAnswersMapForTransaction(String transactionId) async {
+    final answers = await getAnswersForTransaction(transactionId);
+    final answerMap = <String, String>{};
+    for (final answer in answers) {
+      answerMap[answer.questionId] = answer.value;
+    }
+    return answerMap;
   }
 } 

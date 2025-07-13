@@ -12,6 +12,7 @@ abstract class IDataSource {
   Stream<List<Transaction>> watchTransactionsForProduct(String productId);
   Future<void> deleteAllTransactions();
   Future<void> deleteTransactionsForProduct(String productId);
+  Future<void> updateTransactionQuantity(String transactionId, int quantity);
   
   // Prompt Questions
   Stream<List<PromptQuestion>> watchPromptQuestions();
@@ -24,4 +25,6 @@ abstract class IDataSource {
       {required TransactionsCompanion transaction,
       required List<PromptAnswersCompanion> answers});
   Future<PromptAnswer?> getLastAnswerForQuestion(String questionId);
+  Future<List<PromptAnswer>> getAnswersForTransaction(String transactionId);
+  Future<Map<String, String>> getAnswersMapForTransaction(String transactionId);
 } 

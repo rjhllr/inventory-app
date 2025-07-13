@@ -82,6 +82,35 @@ class ScanningVm {
       answers: answerCompanions,
     );
   }
+
+  Future<int> calculateEffectiveCountAtTransaction(String productId, DateTime timestamp) async {
+    final dataSource = ref.read(dataSourceProvider);
+    final transactions = await dataSource.watchTransactionsForProduct(productId).first;
+    
+    // Get all transactions up to and including the specified timestamp
+    final relevantTransactions = transactions.where((t) => t.timestamp.isBefore(timestamp) || t.timestamp.isAtSameMomentAs(timestamp)).toList();
+    
+    // Calculate sum of quantities
+    return relevantTransactions.fold<int>(0, (sum, transaction) => sum + transaction.quantity);
+  }
+
+  Future<void> updateTransactionQuantity(String transactionId, int quantity) async {
+    final dataSource = ref.read(dataSourceProvider);
+    await dataSource.updateTransactionQuantity(transactionId, quantity);
+  }
+
+  Future<void> addQuantityToTransaction(String transactionId, int deltaQuantity) async {
+    final dataSource = ref.read(dataSourceProvider);
+    final transactions = await dataSource.watchTransactions().first;
+    final transaction = transactions.firstWhere((t) => t.id == transactionId);
+    final newQuantity = transaction.quantity + deltaQuantity;
+    await dataSource.updateTransactionQuantity(transactionId, newQuantity);
+  }
+
+  Future<Map<String, String>> getTransactionAnswers(String transactionId) async {
+    final dataSource = ref.read(dataSourceProvider);
+    return await dataSource.getAnswersMapForTransaction(transactionId);
+  }
 }
 
 final scanningVmProvider = Provider<ScanningVm>((ref) => ScanningVm(ref));

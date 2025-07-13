@@ -18,11 +18,28 @@ class ScanningScreen extends ConsumerStatefulWidget {
 
 class _ScanningScreenState extends ConsumerState<ScanningScreen> {
   bool _pause = false;
+  String? _lastScannedCode;
+  DateTime? _lastScanTime;
+  static const Duration _debounceDuration = Duration(seconds: 2);
 
   Future<void> _onDetect(BarcodeCapture capture) async {
     if (_pause) return;
     final code = capture.barcodes.first.rawValue;
     if (code == null || code.isEmpty) return;
+
+    // Debounce: Check if this is the same code as last time
+    final now = DateTime.now();
+    if (_lastScannedCode == code && _lastScanTime != null) {
+      final timeSinceLastScan = now.difference(_lastScanTime!);
+      if (timeSinceLastScan < _debounceDuration) {
+        // Same code within debounce period, ignore
+        return;
+      }
+    }
+
+    // Update last scanned code and time
+    _lastScannedCode = code;
+    _lastScanTime = now;
 
     // Haptic feedback
     HapticFeedback.lightImpact();
@@ -32,6 +49,7 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
 
     final scanningVm = ref.read(scanningVmProvider);
     final settingsVm = ref.read(settingsVmProvider);
+    final contextForDialog = context;
     final requiredPrompts = await scanningVm.getPromptsForCode(code);
     final quantityPrompt = settingsVm.isQuantityPromptEnabled;
 
@@ -40,11 +58,11 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
       await scanningVm.saveTransaction(code: code, quantity: 1, answers: {});
     } else {
       // Show dialog to collect info
+      if (!mounted) return;
       final results = await showDialog<Map<String, dynamic>>(
-        context: context,
+        context: contextForDialog,
         barrierDismissible: false,
         builder: (_) => ProviderScope(
-          parent: ProviderScope.containerOf(context),
           child: _PromptDialog(
             productCode: code,
             questions: requiredPrompts,
@@ -66,6 +84,16 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
     Future.delayed(const Duration(milliseconds: 800), () {
       if (mounted) setState(() => _pause = false);
     });
+  }
+
+  Future<void> _showTransactionPreview(Transaction transaction) async {
+    if (!mounted) return;
+    await showDialog(
+      context: context,
+      builder: (_) => ProviderScope(
+        child: _TransactionPreviewDialog(transaction: transaction),
+      ),
+    );
   }
 
   @override
@@ -93,15 +121,297 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
                 itemCount: transactions.length,
                 itemBuilder: (context, index) {
                   final transaction = transactions[index];
-                  return ListTile(
-                    title: Text(transaction.productId),
-                    subtitle: Text(transaction.timestamp.toLocal().toString()),
-                    trailing: Text('${transaction.quantity > 0 ? '+' : ''}${transaction.quantity}'),
+                  return _TransactionTile(
+                    transaction: transaction,
+                    onTap: () => _showTransactionPreview(transaction),
                   );
                 },
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('Error: $e')),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TransactionTile extends ConsumerWidget {
+  final Transaction transaction;
+  final VoidCallback onTap;
+
+  const _TransactionTile({
+    required this.transaction,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return FutureBuilder<int>(
+      future: ref.read(scanningVmProvider).calculateEffectiveCountAtTransaction(
+        transaction.productId,
+        transaction.timestamp,
+      ),
+      builder: (context, snapshot) {
+        final effectiveCount = snapshot.data ?? 0;
+        final isPositive = effectiveCount > 0;
+        final isNegative = effectiveCount < 0;
+
+        return ListTile(
+          onTap: onTap,
+          title: Text(transaction.productId),
+          subtitle: Text(transaction.timestamp.toLocal().toString()),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('${transaction.quantity > 0 ? '+' : ''}${transaction.quantity}'),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: isPositive
+                      ? Colors.green.withValues(alpha: 0.1)
+                      : isNegative
+                          ? Colors.red.withValues(alpha: 0.1)
+                          : Colors.grey.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  effectiveCount.toString(),
+                  style: TextStyle(
+                    color: isPositive
+                        ? Colors.green
+                        : isNegative
+                            ? Colors.red
+                            : Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _TransactionPreviewDialog extends ConsumerStatefulWidget {
+  final Transaction transaction;
+
+  const _TransactionPreviewDialog({required this.transaction});
+
+  @override
+  ConsumerState<_TransactionPreviewDialog> createState() => _TransactionPreviewDialogState();
+}
+
+class _TransactionPreviewDialogState extends ConsumerState<_TransactionPreviewDialog> {
+  late TextEditingController _totalCountController;
+  Map<String, String> _answers = {};
+  List<PromptQuestion> _questions = [];
+  bool _isLoading = true;
+  int _currentEffectiveCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _totalCountController = TextEditingController();
+    _loadData();
+  }
+
+  @override
+  void dispose() {
+    _totalCountController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadData() async {
+    final scanningVm = ref.read(scanningVmProvider);
+    final answers = await scanningVm.getTransactionAnswers(widget.transaction.id);
+    final questions = await ref.read(promptQuestionsProvider.future);
+    final effectiveCount = await scanningVm.calculateEffectiveCountAtTransaction(
+      widget.transaction.productId,
+      widget.transaction.timestamp,
+    );
+    
+    setState(() {
+      _answers = answers;
+      _questions = questions;
+      _currentEffectiveCount = effectiveCount;
+      _totalCountController.text = effectiveCount.toString();
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _setNewTotal() async {
+    final newTotal = int.tryParse(_totalCountController.text);
+    if (newTotal == null) return;
+    
+    final difference = newTotal - _currentEffectiveCount;
+    if (difference == 0) return;
+    
+    final scanningVm = ref.read(scanningVmProvider);
+    
+    // Create a corrective transaction
+    await scanningVm.saveTransaction(
+      code: widget.transaction.productId,
+      quantity: difference,
+      answers: {},
+    );
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Total count set to $newTotal (${difference > 0 ? '+' : ''}$difference)'),
+          backgroundColor: difference > 0 ? Colors.green : Colors.red,
+        ),
+      );
+      Navigator.of(context).pop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Loading...'),
+          ],
+        ),
+      );
+    }
+
+    final isPositive = _currentEffectiveCount > 0;
+    final isNegative = _currentEffectiveCount < 0;
+
+    return AlertDialog(
+      title: const Text('Transaction Details'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Product info
+            _InfoRow(label: 'Product', value: widget.transaction.productId),
+            _InfoRow(
+              label: 'Timestamp',
+              value: DateFormat('yyyy-MM-dd HH:mm:ss').format(widget.transaction.timestamp.toLocal()),
+            ),
+            _InfoRow(label: 'This Transaction', value: '${widget.transaction.quantity > 0 ? '+' : ''}${widget.transaction.quantity}'),
+            
+            // Current effective count
+            _InfoRow(
+              label: 'Current Total',
+              value: _currentEffectiveCount.toString(),
+              valueColor: isPositive
+                  ? Colors.green
+                  : isNegative
+                      ? Colors.red
+                      : Colors.grey,
+            ),
+            
+            const SizedBox(height: 20),
+            
+            // Set new total section
+            const Text('Set New Total Count:', style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _totalCountController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Total Count',
+                      hintText: 'Enter desired total',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton(
+                  onPressed: _setNewTotal,
+                  child: const Text('Set'),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Attributes
+            if (_answers.isNotEmpty) ...[
+              const Text('Attributes:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              ..._answers.entries.map((entry) {
+                final question = _questions.firstWhere(
+                  (q) => q.id == entry.key,
+                  orElse: () => PromptQuestion(
+                    id: entry.key,
+                    label: entry.key,
+                    inputType: 'text',
+                    askMode: 'once',
+                    prefillLastInput: false,
+                    createdAt: DateTime.now(),
+                    updatedAt: DateTime.now(),
+                  ),
+                );
+                return _InfoRow(
+                  label: question.label,
+                  value: entry.value,
+                );
+              }),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Close'),
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? valueColor;
+
+  const _InfoRow({
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              '$label:',
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                color: valueColor ?? Theme.of(context).textTheme.bodyLarge?.color,
+                fontWeight: valueColor != null ? FontWeight.bold : null,
+              ),
             ),
           ),
         ],
@@ -192,7 +502,7 @@ class _PromptDialogState extends ConsumerState<_PromptDialog> {
                     }
                     return null;
                   },
-                  onSaved: (value) => _quantity = int.parse(value!),
+                  onSaved: (value) => _quantity = int.parse(value ?? '1'),
                 ),
                 const SizedBox(height: 16),
               ],
@@ -214,7 +524,7 @@ class _PromptDialogState extends ConsumerState<_PromptDialog> {
                           }
                           return null;
                         },
-                        onSaved: (value) => _answers[question.id] = value!,
+                        onSaved: (value) => _answers[question.id] = value ?? '',
                       ),
                     );
                   case 'text':
@@ -229,7 +539,7 @@ class _PromptDialogState extends ConsumerState<_PromptDialog> {
                           }
                           return null;
                         },
-                        onSaved: (value) => _answers[question.id] = value!,
+                        onSaved: (value) => _answers[question.id] = value ?? '',
                       ),
                     );
                   case 'date':
@@ -238,7 +548,7 @@ class _PromptDialogState extends ConsumerState<_PromptDialog> {
                       child: _DateField(
                         label: question.label,
                         initialValue: _initialValues[question.id] as DateTime?,
-                        onSaved: (value) => _answers[question.id] = value!.toIso8601String(),
+                        onSaved: (value) => _answers[question.id] = value.toIso8601String(),
                       ),
                     );
                   default:
