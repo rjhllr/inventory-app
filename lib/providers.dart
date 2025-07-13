@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'data/app_database.dart';
 import 'data/i_data_source.dart';
 import 'data/local_db_data_source.dart';
+import 'services/export_service.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
@@ -17,4 +18,8 @@ final dataSourceProvider = Provider<IDataSource>(
 
 final sharedPrefsProvider = Provider<SharedPreferences>((ref) {
   throw UnimplementedError('SharedPreferences not initialized');
-}); 
+});
+
+final exportServiceProvider = Provider<ExportService>(
+  (ref) => ExportService(ref.watch(dataSourceProvider)),
+); 

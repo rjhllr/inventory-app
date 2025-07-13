@@ -4,13 +4,61 @@ import 'package:intl/intl.dart';
 
 import '../data/app_database.dart';
 import '../view_models/scanning_vm.dart';
+import '../providers.dart';
+import '../services/export_service.dart';
 
 class ScanResultsScreen extends ConsumerWidget {
   const ScanResultsScreen({super.key});
 
+  Future<void> _handleExport(BuildContext context, ExportService exportService) async {
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Generating export...'),
+            ],
+          ),
+        ),
+      );
+
+      // Perform export
+      await exportService.exportToZip();
+
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Export completed successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transactionsAsync = ref.watch(transactionsStreamProvider);
+    final exportService = ref.watch(exportServiceProvider);
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Transaction History'),
@@ -18,11 +66,7 @@ class ScanResultsScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.share),
             tooltip: 'Export',
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Export feature coming soon.')),
-              );
-            },
+            onPressed: () => _handleExport(context, exportService),
           ),
         ],
       ),
