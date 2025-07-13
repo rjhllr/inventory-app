@@ -148,20 +148,79 @@ class _TransactionTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return FutureBuilder<int>(
-      future: ref.read(scanningVmProvider).calculateEffectiveCountAtTransaction(
-        transaction.productId,
-        transaction.timestamp,
-      ),
+    return FutureBuilder<List<dynamic>>(
+      future: Future.wait([
+        ref.read(scanningVmProvider).calculateEffectiveCountAtTransaction(
+          transaction.productId,
+          transaction.timestamp,
+        ),
+        ref.read(scanningVmProvider).categorizeAnswersForTransaction(transaction.id),
+      ]),
       builder: (context, snapshot) {
-        final effectiveCount = snapshot.data ?? 0;
+        final effectiveCount = snapshot.data?[0] ?? 0;
+        final categorizedAnswers = snapshot.data?[1] as Map<String, Map<String, String>>? ?? {};
+        
+        final perScanAnswers = categorizedAnswers['per_scan'] ?? {};
+        final onceAnswers = categorizedAnswers['once'] ?? {};
+        
         final isPositive = effectiveCount > 0;
         final isNegative = effectiveCount < 0;
 
         return ListTile(
           onTap: onTap,
           title: Text(transaction.productId),
-          subtitle: Text(transaction.timestamp.toLocal().toString()),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(transaction.timestamp.toLocal().toString()),
+              // Show per-scan attributes
+              if (perScanAnswers.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                FutureBuilder<List<String>>(
+                  future: Future.wait(perScanAnswers.entries.map((entry) async {
+                    final label = await ref.read(scanningVmProvider).getQuestionLabel(entry.key);
+                    return '$label: ${entry.value}';
+                  })),
+                  builder: (context, attrSnapshot) {
+                    if (attrSnapshot.hasData) {
+                      return Text(
+                        attrSnapshot.data!.join(', '),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ],
+              // Show "once" attributes with small text for subsequent scans
+              if (onceAnswers.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                FutureBuilder<List<String>>(
+                  future: Future.wait(onceAnswers.entries.map((entry) async {
+                    final label = await ref.read(scanningVmProvider).getQuestionLabel(entry.key);
+                    return '$label: ${entry.value}';
+                  })),
+                  builder: (context, attrSnapshot) {
+                    if (attrSnapshot.hasData) {
+                      return Text(
+                        attrSnapshot.data!.join(', '),
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey[600],
+                          fontStyle: FontStyle.italic,
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ],
+            ],
+          ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

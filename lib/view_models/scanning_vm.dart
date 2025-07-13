@@ -111,6 +111,85 @@ class ScanningVm {
     final dataSource = ref.read(dataSourceProvider);
     return await dataSource.getAnswersMapForTransaction(transactionId);
   }
+
+  /// Helper method to get "once" attributes for a product
+  /// Returns the first answer found for each "once" question for this product
+  Future<Map<String, String>> getOnceAttributesForProduct(String productId) async {
+    final dataSource = ref.read(dataSourceProvider);
+    final questions = await ref.read(promptQuestionsProvider.future);
+    final onceQuestions = questions.where((q) => q.askMode == AskMode.once.name).toList();
+    
+    final onceAttributes = <String, String>{};
+    
+    for (final question in onceQuestions) {
+      // Get the first transaction for this product that has an answer to this question
+      final transactions = await dataSource.watchTransactionsForProduct(productId).first;
+      
+      for (final transaction in transactions.reversed) { // Check oldest first
+        final answers = await dataSource.getAnswersMapForTransaction(transaction.id);
+        if (answers.containsKey(question.id)) {
+          onceAttributes[question.id] = answers[question.id]!;
+          break; // Found the answer, move to next question
+        }
+      }
+    }
+    
+    return onceAttributes;
+  }
+
+  /// Helper method to categorize answers by ask mode
+  Future<Map<String, Map<String, String>>> categorizeAnswersForTransaction(String transactionId) async {
+    final dataSource = ref.read(dataSourceProvider);
+    final questions = await ref.read(promptQuestionsProvider.future);
+    final answers = await dataSource.getAnswersMapForTransaction(transactionId);
+    
+    final perScanAnswers = <String, String>{};
+    final onceAnswers = <String, String>{};
+    
+    for (final entry in answers.entries) {
+      final question = questions.firstWhere(
+        (q) => q.id == entry.key,
+        orElse: () => PromptQuestion(
+          id: entry.key,
+          label: entry.key,
+          inputType: 'text',
+          askMode: 'once',
+          prefillLastInput: false,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      );
+      
+      if (question.askMode == AskMode.every_scan.name) {
+        perScanAnswers[entry.key] = entry.value;
+      } else {
+        onceAnswers[entry.key] = entry.value;
+      }
+    }
+    
+    return {
+      'per_scan': perScanAnswers,
+      'once': onceAnswers,
+    };
+  }
+
+  /// Helper method to get question label by ID
+  Future<String> getQuestionLabel(String questionId) async {
+    final questions = await ref.read(promptQuestionsProvider.future);
+    final question = questions.firstWhere(
+      (q) => q.id == questionId,
+      orElse: () => PromptQuestion(
+        id: questionId,
+        label: questionId,
+        inputType: 'text',
+        askMode: 'once',
+        prefillLastInput: false,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+    );
+    return question.label;
+  }
 }
 
 final scanningVmProvider = Provider<ScanningVm>((ref) => ScanningVm(ref));

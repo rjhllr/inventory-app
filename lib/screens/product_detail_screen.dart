@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../data/app_database.dart';
 import '../view_models/scanning_vm.dart';
+import '../providers.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
   final String productId;
@@ -116,27 +117,85 @@ class ProductDetailScreen extends ConsumerWidget {
                             value: '$negativeTransactions',
                             color: Colors.red,
                           ),
-                        ],
-                      ),
-                    ],
+                                        ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      
+      // "Once" attributes section
+      FutureBuilder<Map<String, String>>(
+        future: ref.read(scanningVmProvider).getOnceAttributesForProduct(productId),
+        builder: (context, snapshot) {
+          final onceAttributes = snapshot.data ?? {};
+          
+          if (onceAttributes.isEmpty) {
+            return const SizedBox.shrink();
+          }
+          
+          return Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Product Attributes',
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
-                ),
+                  const SizedBox(height: 12),
+                  ...onceAttributes.entries.map((entry) {
+                    return FutureBuilder<String>(
+                      future: ref.read(scanningVmProvider).getQuestionLabel(entry.key),
+                      builder: (context, labelSnapshot) {
+                        final label = labelSnapshot.data ?? entry.key;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: 100,
+                                child: Text(
+                                  '$label:',
+                                  style: const TextStyle(fontWeight: FontWeight.w500),
+                                ),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  entry.value,
+                                  style: TextStyle(color: Colors.grey[700]),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  }),
+                ],
               ),
-              
-              // Transaction history header
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  children: [
-                    const Icon(Icons.history),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Transaction History',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ],
-                ),
-              ),
+            ),
+          );
+        },
+      ),
+      
+      // Transaction history header
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            const Icon(Icons.history),
+            const SizedBox(width: 8),
+            Text(
+              'Transaction History',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ],
+        ),
+      ),
               
               // Transaction history list
               Expanded(
