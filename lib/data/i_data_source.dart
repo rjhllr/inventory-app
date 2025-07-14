@@ -5,6 +5,7 @@ abstract class IDataSource {
   Future<void> upsertProduct(ProductsCompanion product);
   Stream<List<Product>> watchProducts();
   Stream<List<Product>> watchProductsWithTransactions();
+  Future<void> deleteAllProducts();
 
   // Transactions
   Future<void> addTransaction(TransactionsCompanion transaction);

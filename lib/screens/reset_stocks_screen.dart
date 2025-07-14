@@ -1,9 +1,79 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:inventory_app/view_models/reset_stocks_vm.dart';
+import '../providers.dart';
 
 class ResetStocksScreen extends ConsumerWidget {
   const ResetStocksScreen({super.key});
+
+  Future<void> _handleResetAllData(BuildContext context, WidgetRef ref) async {
+    final confirmed = await _showResetAllDataConfirmationDialog(context);
+    if (!confirmed) return;
+
+    try {
+      final dataSource = ref.read(dataSourceProvider);
+      
+      // Delete all data (order matters due to foreign key constraints)
+      await dataSource.deleteAllTransactions(); // This also deletes prompt answers
+      await dataSource.deleteAllProducts();
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('All data has been permanently deleted'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete data: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<bool> _showResetAllDataConfirmationDialog(BuildContext context) async {
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning, color: Colors.red),
+            SizedBox(width: 8),
+            Text('Delete All Data'),
+          ],
+        ),
+        content: const Text(
+          'THIS ACTION CANNOT BE UNDONE!\n\n'
+          'This will permanently delete:\n'
+          '• All scanned products\n'
+          '• All transaction history\n'
+          '• All prompt answers\n\n'
+          'Are you absolutely sure you want to continue?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('DELETE ALL'),
+          ),
+        ],
+      ),
+    ) ?? false;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -12,7 +82,7 @@ class ResetStocksScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Reset Stocks'),
+        title: const Text('Reset Stocks / Data'),
       ),
       body: Column(
         children: [
@@ -20,6 +90,43 @@ class ResetStocksScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
+                Card(
+                  color: Colors.red.shade50,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Icon(Icons.warning, color: Colors.red.shade700, size: 32),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Reset All Data',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red.shade700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Permanently delete all data including products, transactions, and prompt answers. This action cannot be undone.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.red.shade600),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.delete_forever),
+                          label: const Text('Delete All Data'),
+                          onPressed: () => _handleResetAllData(context, ref),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red.shade700,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),

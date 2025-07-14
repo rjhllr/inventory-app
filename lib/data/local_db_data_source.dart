@@ -30,6 +30,11 @@ class LocalDbDataSource implements IDataSource {
   }
 
   @override
+  Future<void> deleteAllProducts() {
+    return _db.delete(_db.products).go();
+  }
+
+  @override
   Future<void> addTransaction(TransactionsCompanion transaction) async {
     await _db.into(_db.transactions).insert(transaction);
   }

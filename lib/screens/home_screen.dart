@@ -52,6 +52,8 @@ class HomeScreen extends ConsumerWidget {
     }
   }
 
+
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transactions = ref.watch(transactionsStreamProvider);
@@ -70,7 +72,7 @@ class HomeScreen extends ConsumerWidget {
           ),
           if (transactions.hasValue && transactions.value!.isNotEmpty)
             const _NavTile(
-              label: 'Reset Stocks',
+              label: 'Reset Stocks / Data',
               routeName: 'reset-stocks',
               icon: Icons.delete_sweep,
             ),
@@ -126,6 +128,8 @@ class _NavTile extends StatelessWidget {
     );
   }
 }
+
+
 
 class _ExportTile extends StatelessWidget {
   final VoidCallback onTap;
