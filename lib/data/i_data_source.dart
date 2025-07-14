@@ -19,6 +19,7 @@ abstract class IDataSource {
   Stream<List<PromptQuestion>> watchPromptQuestions();
   Future<void> upsertPromptQuestion(PromptQuestionsCompanion question);
   Future<void> deletePromptQuestion(String id);
+  Future<void> deleteAllPromptQuestions();
  
   // Prompt Answers
   Future<bool> hasAnswerForProduct(String productId, String questionId);

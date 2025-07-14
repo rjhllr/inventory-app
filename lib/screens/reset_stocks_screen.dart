@@ -16,6 +16,7 @@ class ResetStocksScreen extends ConsumerWidget {
       // Delete all data (order matters due to foreign key constraints)
       await dataSource.deleteAllTransactions(); // This also deletes prompt answers
       await dataSource.deleteAllProducts();
+      await dataSource.deleteAllPromptQuestions();
       
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -54,7 +55,8 @@ class ResetStocksScreen extends ConsumerWidget {
           'This will permanently delete:\n'
           '• All scanned products\n'
           '• All transaction history\n'
-          '• All prompt answers\n\n'
+          '• All prompt answers\n'
+          '• All custom prompt questions\n\n'
           'Are you absolutely sure you want to continue?',
         ),
         actions: [
@@ -105,7 +107,7 @@ class ResetStocksScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 8),
                         const Text(
-                          'PERMANENT DELETION: This will completely remove all products, transactions, and history. This action cannot be undone.',
+                          'PERMANENT DELETION: This will completely remove all products, transactions, prompt questions, and history. This action cannot be undone.',
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.red),
                         ),

@@ -88,6 +88,11 @@ class LocalDbDataSource implements IDataSource {
   }
 
   @override
+  Future<void> deleteAllPromptQuestions() {
+    return _db.delete(_db.promptQuestions).go();
+  }
+
+  @override
   Future<bool> hasAnswerForProduct(String productId, String questionId) async {
     final query = _db.select(_db.promptAnswers).join([
       innerJoin(_db.transactions, _db.transactions.id.equalsExp(_db.promptAnswers.transactionId))
