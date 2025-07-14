@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'dart:io';
 
 import '../data/app_database.dart';
 import '../view_models/scanning_vm.dart';
+import '../l10n/app_localizations.dart';
+import '../datetime_utils.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
   final String productId;
@@ -27,20 +28,21 @@ class ProductDetailScreen extends ConsumerWidget {
       body: transactionsAsync.when(
         data: (transactions) {
           if (transactions.isEmpty) {
-            return const Center(
+            final l10n = AppLocalizations.of(context)!;
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.history, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
+                  const Icon(Icons.history, size: 64, color: Colors.grey),
+                  const SizedBox(height: 16),
                   Text(
-                    'No transaction history yet',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                    l10n.noTransactionHistoryYet,
+                    style: const TextStyle(fontSize: 18, color: Colors.grey),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
-                    'Scan this product to see its transaction history here',
-                    style: TextStyle(color: Colors.grey),
+                    l10n.scanProductToSeeHistory,
+                    style: const TextStyle(color: Colors.grey),
                   ),
                 ],
               ),
@@ -63,7 +65,7 @@ class ProductDetailScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Stock Summary',
+                        AppLocalizations.of(context)!.stockSummary,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 16),
@@ -74,7 +76,7 @@ class ProductDetailScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Current Stock',
+                                AppLocalizations.of(context)!.currentStock,
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                               Text(
@@ -90,7 +92,7 @@ class ProductDetailScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                'Total Transactions',
+                                AppLocalizations.of(context)!.totalTransactions,
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                               Text(
@@ -107,13 +109,13 @@ class ProductDetailScreen extends ConsumerWidget {
                         children: [
                           _StatChip(
                             icon: Icons.add,
-                            label: 'Additions',
+                            label: AppLocalizations.of(context)!.additions,
                             value: '$positiveTransactions',
                             color: Colors.green,
                           ),
                           _StatChip(
                             icon: Icons.remove,
-                            label: 'Reductions',
+                            label: AppLocalizations.of(context)!.reductions,
                             value: '$negativeTransactions',
                             color: Colors.red,
                           ),
@@ -142,7 +144,7 @@ class ProductDetailScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Product Attributes',
+                    AppLocalizations.of(context)!.productAttributes,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 12),
@@ -201,7 +203,7 @@ class ProductDetailScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Photos (${photos.length})',
+                        AppLocalizations.of(context)!.photosCount(photos.length),
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 12),
@@ -253,7 +255,7 @@ class ProductDetailScreen extends ConsumerWidget {
                                                 ),
                                                 const SizedBox(height: 4),
                                                 Text(
-                                                  'File not found',
+                                                  AppLocalizations.of(context)!.fileNotFound,
                                                   style: TextStyle(
                                                     fontSize: 10,
                                                     color: Colors.grey[600],
@@ -274,16 +276,16 @@ class ProductDetailScreen extends ConsumerWidget {
                 ),
               );
             },
-            loading: () => const Card(
-              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            loading: () => Card(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Padding(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Photos'),
-                    SizedBox(height: 12),
-                    Center(child: CircularProgressIndicator()),
+                    Text(AppLocalizations.of(context)!.photos),
+                    const SizedBox(height: 12),
+                    const Center(child: CircularProgressIndicator()),
                   ],
                 ),
               ),
@@ -292,20 +294,20 @@ class ProductDetailScreen extends ConsumerWidget {
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Photos',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Error loading photos: $error',
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  ],
-                ),
+                                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.photos,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        AppLocalizations.of(context)!.errorLoadingPhotos(error.toString()),
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ],
+                  ),
               ),
             ),
           );
@@ -320,7 +322,7 @@ class ProductDetailScreen extends ConsumerWidget {
             const Icon(Icons.history),
             const SizedBox(width: 8),
             Text(
-              'Transaction History',
+              AppLocalizations.of(context)!.transactionHistoryTitle,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ],
@@ -333,7 +335,7 @@ class ProductDetailScreen extends ConsumerWidget {
                   itemCount: transactions.length,
                   itemBuilder: (context, index) {
                     final transaction = transactions[index];
-                    final isToday = _isToday(transaction.timestamp);
+                    final isToday = DateTimeUtils.isToday(transaction.timestamp);
                     final isPositive = transaction.quantity > 0;
                     
                     return Card(
@@ -348,12 +350,12 @@ class ProductDetailScreen extends ConsumerWidget {
                         ),
                         title: Text(
                           isToday 
-                            ? 'Today at ${DateFormat.jm().format(transaction.timestamp.toLocal())}'
-                            : DateFormat.yMMMd().add_jm().format(transaction.timestamp.toLocal()),
+                            ? DateTimeUtils.formatTodayAt(context, transaction.timestamp.toLocal())
+                            : DateTimeUtils.formatTransactionHistory(context, transaction.timestamp.toLocal()),
                           style: const TextStyle(fontWeight: FontWeight.w500),
                         ),
                         subtitle: Text(
-                          _getTransactionDescription(transaction),
+                          _getTransactionDescription(context, transaction),
                           style: TextStyle(color: Colors.grey[600]),
                         ),
                         trailing: Text(
@@ -379,11 +381,11 @@ class ProductDetailScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Error loading transaction history: $e'),
+              Text(AppLocalizations.of(context)!.errorLoadingTransactionHistory(e.toString())),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => ref.refresh(productTransactionsStreamProvider(productId)),
-                child: const Text('Retry'),
+                child: Text(AppLocalizations.of(context)!.retry),
               ),
             ],
           ),
@@ -392,43 +394,40 @@ class ProductDetailScreen extends ConsumerWidget {
     );
   }
   
-  bool _isToday(DateTime dateTime) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final date = DateTime(dateTime.year, dateTime.month, dateTime.day);
-    return date.isAtSameMomentAs(today);
-  }
+
   
-  String _getTransactionDescription(Transaction transaction) {
+  String _getTransactionDescription(BuildContext context, Transaction transaction) {
+    final l10n = AppLocalizations.of(context)!;
     if (transaction.quantity > 0) {
-      return 'Stock addition';
+      return l10n.stockAddition;
     } else {
-      return 'Stock reduction';
+      return l10n.stockReduction;
     }
   }
   
   void _showProductInfo(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Product Information'),
+        title: Text(l10n.productInformationTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Product ID: $productId'),
+            Text(l10n.productIdLabel(productId)),
             const SizedBox(height: 8),
-            const Text('This screen shows the complete transaction history for this product.'),
+            Text(l10n.productInfoDescription),
             const SizedBox(height: 8),
-            const Text('• Positive quantities represent stock additions'),
-            const Text('• Negative quantities represent stock reductions or resets'),
-            const Text('• Current stock is the sum of all transactions'),
+            Text(l10n.positiveQuantitiesInfo),
+            Text(l10n.negativeQuantitiesInfo),
+            Text(l10n.currentStockInfo),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
+            child: Text(l10n.close),
           ),
         ],
       ),
@@ -449,7 +448,7 @@ class ProductDetailScreen extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               AppBar(
-                title: Text('Photo ${initialIndex + 1} of ${photos.length}'),
+                title: Text(AppLocalizations.of(context)!.photoViewerTitle(initialIndex + 1, photos.length)),
                 backgroundColor: Colors.black,
                 foregroundColor: Colors.white,
                 automaticallyImplyLeading: false,
@@ -518,8 +517,8 @@ class ProductDetailScreen extends ConsumerWidget {
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
-                                      'File not found',
-                                      style: TextStyle(color: Colors.grey),
+                                      AppLocalizations.of(context)!.fileNotFound,
+                                      style: const TextStyle(color: Colors.grey),
                                     ),
                                     const SizedBox(height: 8),
                                     Text(

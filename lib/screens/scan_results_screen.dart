@@ -1,27 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../data/app_database.dart';
 import '../view_models/scanning_vm.dart';
 import '../providers.dart';
 import '../services/export_service.dart';
+import '../l10n/app_localizations.dart';
+import '../datetime_utils.dart';
 
 class ScanResultsScreen extends ConsumerWidget {
   const ScanResultsScreen({super.key});
 
   Future<void> _handleExport(BuildContext context, ExportService exportService) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       // Show loading dialog
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const AlertDialog(
+        builder: (context) => AlertDialog(
           content: Row(
             children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 16),
-              Text('Generating export...'),
+              const CircularProgressIndicator(),
+              const SizedBox(width: 16),
+              Text(l10n.generatingExport),
             ],
           ),
         ),
@@ -34,8 +36,8 @@ class ScanResultsScreen extends ConsumerWidget {
       if (context.mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Export completed successfully!'),
+          SnackBar(
+            content: Text(l10n.exportCompletedSuccessfully),
             backgroundColor: Colors.green,
           ),
         );
@@ -46,7 +48,7 @@ class ScanResultsScreen extends ConsumerWidget {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Export failed: ${e.toString()}'),
+            content: Text(l10n.exportFailed(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -58,14 +60,15 @@ class ScanResultsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final transactionsAsync = ref.watch(transactionsStreamProvider);
     final exportService = ref.watch(exportServiceProvider);
+    final l10n = AppLocalizations.of(context)!;
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transaction History'),
+        title: Text(l10n.transactionHistory),
         actions: [
           IconButton(
             icon: const Icon(Icons.share),
-            tooltip: 'Export',
+            tooltip: l10n.export,
             onPressed: () => _handleExport(context, exportService),
           ),
         ],
@@ -73,20 +76,20 @@ class ScanResultsScreen extends ConsumerWidget {
       body: transactionsAsync.when(
         data: (transactions) {
           if (transactions.isEmpty) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.history, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
+                  const Icon(Icons.history, size: 64, color: Colors.grey),
+                  const SizedBox(height: 16),
                   Text(
-                    'No transactions recorded yet',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                    l10n.noTransactionsRecordedYet,
+                    style: const TextStyle(fontSize: 18, color: Colors.grey),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
-                    'Start scanning products to see transaction history',
-                    style: TextStyle(color: Colors.grey),
+                    l10n.startScanningToSeeHistory,
+                    style: const TextStyle(color: Colors.grey),
                   ),
                 ],
               ),
@@ -120,7 +123,7 @@ class ScanResultsScreen extends ConsumerWidget {
                     style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                   subtitle: Text(
-                    DateFormat.yMd().add_jms().format(transaction.timestamp.toLocal()),
+                    DateTimeUtils.formatScanTime(context, transaction.timestamp.toLocal()),
                   ),
                   trailing: Text(
                     '${transaction.quantity > 0 ? '+' : ''}${transaction.quantity}',

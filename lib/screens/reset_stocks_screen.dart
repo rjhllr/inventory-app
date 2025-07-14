@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:inventory_app/view_models/reset_stocks_vm.dart';
 import '../providers.dart';
+import '../l10n/app_localizations.dart';
+import '../datetime_utils.dart';
 
 class ResetStocksScreen extends ConsumerWidget {
   const ResetStocksScreen({super.key});
@@ -19,18 +21,20 @@ class ResetStocksScreen extends ConsumerWidget {
       await dataSource.deleteAllPromptQuestions();
       
       if (context.mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('All data has been permanently deleted'),
+          SnackBar(
+            content: Text(l10n.allDataPermanentlyDeleted),
             backgroundColor: Colors.orange,
           ),
         );
       }
     } catch (e) {
       if (context.mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to delete data: ${e.toString()}'),
+            content: Text(l10n.failedToDeleteData(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -39,30 +43,31 @@ class ResetStocksScreen extends ConsumerWidget {
   }
 
   Future<bool> _showResetAllDataConfirmationDialog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     return await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.warning, color: Colors.red),
-            SizedBox(width: 8),
-            Text('Delete All Data'),
+            const Icon(Icons.warning, color: Colors.red),
+            const SizedBox(width: 8),
+            Text(l10n.deleteAllData),
           ],
         ),
-        content: const Text(
-          'THIS ACTION CANNOT BE UNDONE!\n\n'
-          'This will permanently delete:\n'
-          '• All scanned products\n'
-          '• All transaction history\n'
-          '• All prompt answers\n'
-          '• All custom prompt questions\n\n'
-          'Are you absolutely sure you want to continue?',
+        content: Text(
+          '${l10n.actionCannotBeUndone}\n\n'
+          '${l10n.willPermanentlyDelete}\n'
+          '• ${l10n.allScannedProducts}\n'
+          '• ${l10n.allTransactionHistory}\n'
+          '• ${l10n.allPromptAnswers}\n'
+          '• ${l10n.allCustomPromptQuestions}\n\n'
+          '${l10n.absolutelySureToContinue}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -70,7 +75,7 @@ class ResetStocksScreen extends ConsumerWidget {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('DELETE ALL'),
+            child: Text(l10n.deleteAllCaps),
           ),
         ],
       ),
@@ -81,10 +86,11 @@ class ResetStocksScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final productsWithTransactions = ref.watch(productsWithTransactionsProvider);
     final vm = ref.read(resetStocksVmProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Reset Stocks / Data'),
+        title: Text(l10n.resetStocksData),
       ),
       body: Column(
         children: [
@@ -101,20 +107,20 @@ class ResetStocksScreen extends ConsumerWidget {
                       children: [
                         const Icon(Icons.delete_forever, color: Colors.red, size: 32),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Remove All Data',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
+                        Text(
+                          l10n.removeAllData,
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'PERMANENT DELETION: This will completely remove all products, transactions, prompt questions, and history. This action cannot be undone.',
+                        Text(
+                          l10n.permanentDeletionWarning,
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.red),
+                          style: const TextStyle(color: Colors.red),
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
                           icon: const Icon(Icons.delete_forever),
-                          label: const Text('REMOVE ALL DATA'),
+                          label: Text(l10n.removeAllDataButton),
                           onPressed: () => _handleResetAllData(context, ref),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
@@ -134,19 +140,19 @@ class ResetStocksScreen extends ConsumerWidget {
                       children: [
                         const Icon(Icons.info, color: Colors.blue, size: 32),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Stock Reset Information',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        Text(
+                          l10n.stockResetInformation,
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Resetting stocks creates negative transactions that bring each product\'s stock to zero. This maintains a complete audit trail of all stock movements.',
+                        Text(
+                          l10n.stockResetExplanation,
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
                           icon: const Icon(Icons.refresh),
-                          label: const Text('Reset All Stocks'),
+                          label: Text(l10n.resetAllStocksButton),
                           onPressed: () => _showResetAllConfirmationDialog(context, vm),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Theme.of(context).colorScheme.primary,
@@ -165,20 +171,20 @@ class ResetStocksScreen extends ConsumerWidget {
             child: productsWithTransactions.when(
               data: (products) {
                 if (products.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.check_circle, size: 64, color: Colors.green),
-                        SizedBox(height: 16),
+                        const Icon(Icons.check_circle, size: 64, color: Colors.green),
+                        const SizedBox(height: 16),
                         Text(
-                          'All stocks are at zero',
-                          style: TextStyle(fontSize: 18, color: Colors.green),
+                          l10n.allStocksAtZero,
+                          style: const TextStyle(fontSize: 18, color: Colors.green),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
-                          'No products currently have stock to reset',
-                          style: TextStyle(color: Colors.grey),
+                          l10n.noProductsToReset,
+                          style: const TextStyle(color: Colors.grey),
                         ),
                       ],
                     ),
@@ -192,10 +198,10 @@ class ResetStocksScreen extends ConsumerWidget {
                       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                       child: ListTile(
                         title: Text(product.id),
-                        subtitle: Text('Last updated: ${product.updatedAt.toLocal()}'),
+                        subtitle: Text(l10n.lastUpdated(DateTimeUtils.formatLastUpdated(context, product.updatedAt.toLocal()))),
                         trailing: IconButton(
                           icon: const Icon(Icons.refresh),
-                          tooltip: 'Reset this product stock',
+                          tooltip: l10n.resetThisProductStock,
                           onPressed: () => _showResetProductConfirmationDialog(
                             context,
                             product.id,
@@ -208,7 +214,7 @@ class ResetStocksScreen extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, s) => Center(child: Text('Error: $e')),
+              error: (e, s) => Center(child: Text(l10n.errorMessage(e.toString()))),
             ),
           ),
         ],
@@ -217,19 +223,16 @@ class ResetStocksScreen extends ConsumerWidget {
   }
 
   void _showResetAllConfirmationDialog(BuildContext context, ResetStocksVm vm) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Reset All Stocks'),
-        content: const Text(
-          'This will create negative transactions to bring all product stocks to zero. '
-          'The transaction history will be preserved for audit purposes.\n\n'
-          'Are you sure you want to continue?',
-        ),
+        title: Text(l10n.resetAllStocks),
+        content: Text(l10n.resetAllStocksDescription),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -237,8 +240,8 @@ class ResetStocksScreen extends ConsumerWidget {
               await vm.resetAllStocks();
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('All stocks have been reset to zero'),
+                  SnackBar(
+                    content: Text(l10n.allStocksResetToZero),
                     backgroundColor: Colors.green,
                   ),
                 );
@@ -247,7 +250,7 @@ class ResetStocksScreen extends ConsumerWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
             ),
-            child: const Text('Reset All'),
+            child: Text(l10n.resetAll),
           ),
         ],
       ),
@@ -255,19 +258,16 @@ class ResetStocksScreen extends ConsumerWidget {
   }
 
   void _showResetProductConfirmationDialog(BuildContext context, String productId, ResetStocksVm vm) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Reset Product Stock'),
-        content: Text(
-          'This will create a negative transaction to bring the stock of "$productId" to zero. '
-          'The transaction history will be preserved for audit purposes.\n\n'
-          'Are you sure you want to continue?',
-        ),
+        title: Text(l10n.resetProductStock),
+        content: Text(l10n.resetProductStockDescription(productId)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -276,7 +276,7 @@ class ResetStocksScreen extends ConsumerWidget {
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Stock for "$productId" has been reset to zero'),
+                    content: Text(l10n.stockResetToZero(productId)),
                     backgroundColor: Colors.green,
                   ),
                 );
@@ -284,8 +284,9 @@ class ResetStocksScreen extends ConsumerWidget {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
             ),
-            child: const Text('Reset'),
+            child: Text(l10n.reset),
           ),
         ],
       ),

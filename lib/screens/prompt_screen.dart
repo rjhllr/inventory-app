@@ -9,6 +9,7 @@ import 'dart:io';
 import '../data/app_database.dart';
 import '../providers.dart';
 import '../view_models/scanning_vm.dart';
+import '../l10n/app_localizations.dart';
 
 class PromptScreen extends ConsumerStatefulWidget {
   final String productCode;
@@ -115,9 +116,10 @@ class _PromptScreenState extends ConsumerState<PromptScreen> {
 
   Widget _buildQuantityPage() {
     final pages = _buildPages();
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Product: ${widget.productCode}'),
+        title: Text(l10n.productPrefix(widget.productCode)),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
@@ -137,7 +139,7 @@ class _PromptScreenState extends ConsumerState<PromptScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Enter Quantity',
+                    l10n.enterQuantity,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 32),
@@ -165,7 +167,7 @@ class _PromptScreenState extends ConsumerState<PromptScreen> {
           padding: const EdgeInsets.all(16.0),
           child: ElevatedButton(
             onPressed: _nextPage,
-            child: const Text('Next'),
+            child: Text(l10n.next),
           ),
         ),
       ),
@@ -174,9 +176,10 @@ class _PromptScreenState extends ConsumerState<PromptScreen> {
 
   Widget _buildQuestionPage(PromptQuestion question) {
     final pages = _buildPages();
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Product: ${widget.productCode}'),
+        title: Text(l10n.productPrefix(widget.productCode)),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
@@ -221,7 +224,7 @@ class _PromptScreenState extends ConsumerState<PromptScreen> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: _previousPage,
-                    child: const Text('Previous'),
+                    child: Text(l10n.previous),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -229,7 +232,7 @@ class _PromptScreenState extends ConsumerState<PromptScreen> {
               Expanded(
                 child: ElevatedButton(
                   onPressed: _isLastPage() ? _saveAndFinish : _nextPage,
-                  child: Text(_isLastPage() ? 'Save' : 'Next'),
+                  child: Text(_isLastPage() ? l10n.save : l10n.next),
                 ),
               ),
             ],
@@ -244,17 +247,17 @@ class _PromptScreenState extends ConsumerState<PromptScreen> {
       case 'number':
         return TextFormField(
           initialValue: _initialValues[question.id]?.toString(),
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Enter number',
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            labelText: AppLocalizations.of(context)!.enterNumber,
           ),
           keyboardType: TextInputType.number,
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Please enter a value';
+              return AppLocalizations.of(context)!.pleaseEnterValue;
             }
             if (double.tryParse(value) == null) {
-              return 'Please enter a valid number';
+              return AppLocalizations.of(context)!.pleaseEnterValidNumber;
             }
             return null;
           },
@@ -263,13 +266,13 @@ class _PromptScreenState extends ConsumerState<PromptScreen> {
       case 'text':
         return TextFormField(
           initialValue: _initialValues[question.id]?.toString(),
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Enter text',
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            labelText: AppLocalizations.of(context)!.enterText,
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Please enter a value';
+              return AppLocalizations.of(context)!.pleaseEnterValue;
             }
             return null;
           },
@@ -427,7 +430,7 @@ class _PromptScreenState extends ConsumerState<PromptScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving transaction: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorSavingTransaction(e.toString()))),
         );
       }
     }
@@ -506,14 +509,23 @@ class _DateFieldState extends State<_DateField> {
             const SizedBox(width: 12),
             Text(
               _selectedDate != null
-                  ? DateFormat.yMd().format(_selectedDate!)
-                  : 'Select date',
+                  ? _formatDate(_selectedDate!)
+                  : AppLocalizations.of(context)!.selectDate,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
           ],
         ),
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    final locale = AppLocalizations.of(context)!.localeName;
+    if (locale == 'de') {
+      return DateFormat('dd.MM.yyyy').format(date);
+    } else {
+      return DateFormat('MM/dd/yyyy').format(date);
+    }
   }
 }
 
@@ -558,7 +570,7 @@ class _PhotoFieldState extends State<_PhotoField> {
               // Show error message if save failed
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Failed to save photo')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.failedToSavePhoto)),
                 );
               }
             }
@@ -569,7 +581,7 @@ class _PhotoFieldState extends State<_PhotoField> {
       // Handle camera permission or other errors
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Camera error: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.cameraError(e.toString()))),
         );
       }
     }
@@ -669,7 +681,7 @@ class _PhotoFieldState extends State<_PhotoField> {
           child: ElevatedButton.icon(
             onPressed: _takePhoto,
             icon: const Icon(Icons.camera_alt),
-            label: Text(widget.photos.isEmpty ? 'Take Photo' : 'Add Another Photo'),
+            label: Text(widget.photos.isEmpty ? AppLocalizations.of(context)!.takePhoto : AppLocalizations.of(context)!.addAnotherPhoto),
           ),
         ),
       ],
@@ -714,7 +726,7 @@ class _PhotoFieldState extends State<_PhotoField> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 AppBar(
-                  title: const Text('Photo'),
+                  title: Text(AppLocalizations.of(context)!.photo),
                   automaticallyImplyLeading: false,
                   actions: [
                     IconButton(
@@ -728,8 +740,8 @@ class _PhotoFieldState extends State<_PhotoField> {
                     File(photoPath),
                     fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) {
-                      return const Center(
-                        child: Text('Failed to load image'),
+                      return Center(
+                        child: Text(AppLocalizations.of(context)!.failedToLoadImage),
                       );
                     },
                   ),
@@ -757,7 +769,7 @@ class _PhotoPreviewDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             AppBar(
-              title: const Text('Photo Preview'),
+              title: Text(AppLocalizations.of(context)!.photoPreview),
               automaticallyImplyLeading: false,
             ),
             Expanded(
@@ -773,11 +785,11 @@ class _PhotoPreviewDialog extends StatelessWidget {
                 children: [
                   OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('Retake'),
+                    child: Text(AppLocalizations.of(context)!.retake),
                   ),
                   ElevatedButton(
                     onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('Use Photo'),
+                    child: Text(AppLocalizations.of(context)!.usePhoto),
                   ),
                 ],
               ),

@@ -1,0 +1,832 @@
+{
+  "appTitle": "Inventory App",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "homeTitle": "Inventory App",
+  "@homeTitle": {
+    "description": "Title for the home screen"
+  },
+  "startStockTaking": "Start Stock-taking",
+  "@startStockTaking": {
+    "description": "Button text to start stock-taking"
+  },
+  "resetStocksData": "Reset Stocks / Data",
+  "@resetStocksData": {
+    "description": "Button text to reset stocks and data"
+  },
+  "stockTakingSettings": "Stock-taking Settings",
+  "@stockTakingSettings": {
+    "description": "Button text for stock-taking settings"
+  },
+  "productDatabase": "Product Database",
+  "@productDatabase": {
+    "description": "Button text for product database"
+  },
+  "transactionHistory": "Transaction History",
+  "@transactionHistory": {
+    "description": "Button text for transaction history"
+  },
+  "exportCSV": "Export CSV",
+  "@exportCSV": {
+    "description": "Button text to export CSV"
+  },
+  "exportInventoryData": "Export inventory data as ZIP file",
+  "@exportInventoryData": {
+    "description": "Description for export functionality"
+  },
+  "scanning": "Scanning",
+  "@scanning": {
+    "description": "Title for scanning screen"
+  },
+  "turnOffFlash": "Turn off flash",
+  "@turnOffFlash": {
+    "description": "Tooltip for turning off flash"
+  },
+  "turnOnFlash": "Turn on flash",
+  "@turnOnFlash": {
+    "description": "Tooltip for turning on flash"
+  },
+  "error": "Error",
+  "@error": {
+    "description": "Generic error label"
+  },
+  "errorMessage": "Error: {message}",
+  "@errorMessage": {
+    "description": "Error message with placeholder",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "description": "The error message"
+      }
+    }
+  },
+  "promptForQuantity": "Prompt for Quantity",
+  "@promptForQuantity": {
+    "description": "Setting label for quantity prompt"
+  },
+  "additionalPrompts": "Additional Prompts",
+  "@additionalPrompts": {
+    "description": "Section title for additional prompts"
+  },
+  "add": "Add",
+  "@add": {
+    "description": "Button text to add something"
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Button text to edit something"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Button text to delete something"
+  },
+  "type": "Type",
+  "@type": {
+    "description": "Label for type field"
+  },
+  "mode": "Mode",
+  "@mode": {
+    "description": "Label for mode field"
+  },
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Loading indicator text"
+  },
+  "transactionDetails": "Transaction Details",
+  "@transactionDetails": {
+    "description": "Title for transaction details dialog"
+  },
+  "product": "Product",
+  "@product": {
+    "description": "Label for product field"
+  },
+  "timestamp": "Timestamp",
+  "@timestamp": {
+    "description": "Label for timestamp field"
+  },
+  "thisTransaction": "This Transaction",
+  "@thisTransaction": {
+    "description": "Label for current transaction"
+  },
+  "currentTotal": "Current Total",
+  "@currentTotal": {
+    "description": "Label for current total count"
+  },
+  "setNewTotalCount": "Set New Total Count:",
+  "@setNewTotalCount": {
+    "description": "Label for setting new total count"
+  },
+  "totalCount": "Total Count",
+  "@totalCount": {
+    "description": "Label for total count field"
+  },
+  "enterDesiredTotal": "Enter desired total",
+  "@enterDesiredTotal": {
+    "description": "Hint text for total count field"
+  },
+  "set": "Set",
+  "@set": {
+    "description": "Button text to set a value"
+  },
+  "attributes": "Attributes",
+  "@attributes": {
+    "description": "Label for attributes section"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Button text to close dialog"
+  },
+  "totalCountSetTo": "Total count set to {total} ({difference})",
+  "@totalCountSetTo": {
+    "description": "Success message when setting total count",
+    "placeholders": {
+      "total": {
+        "type": "int",
+        "description": "The new total count"
+      },
+      "difference": {
+        "type": "String",
+        "description": "The difference amount with +/- prefix"
+      }
+    }
+  },
+  "editPrompt": "Edit Prompt",
+  "@editPrompt": {
+    "description": "Title for editing an existing prompt"
+  },
+  "addPrompt": "Add Prompt",
+  "@addPrompt": {
+    "description": "Title for adding a new prompt"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Button text to save changes"
+  },
+  "label": "Label",
+  "@label": {
+    "description": "Label for prompt label field"
+  },
+  "labelHelperText": "This will be shown to users when prompting for input",
+  "@labelHelperText": {
+    "description": "Helper text for prompt label field"
+  },
+  "pleaseEnterLabel": "Please enter a label",
+  "@pleaseEnterLabel": {
+    "description": "Validation message for empty label field"
+  },
+  "inputType": "Input Type",
+  "@inputType": {
+    "description": "Section title for input type selection"
+  },
+  "selectInputTypeDescription": "Select what type of input users will provide:",
+  "@selectInputTypeDescription": {
+    "description": "Description for input type selection"
+  },
+  "askMode": "Ask Mode",
+  "@askMode": {
+    "description": "Section title for ask mode selection"
+  },
+  "chooseAskModeDescription": "Choose when to ask this question:",
+  "@chooseAskModeDescription": {
+    "description": "Description for ask mode selection"
+  },
+  "prefillLastInput": "Prefill last input",
+  "@prefillLastInput": {
+    "description": "Switch label for prefilling last input"
+  },
+  "prefillLastInputDescription": "Automatically populate with the last entered value",
+  "@prefillLastInputDescription": {
+    "description": "Description for prefill last input switch"
+  },
+  "updatePrompt": "Update Prompt",
+  "@updatePrompt": {
+    "description": "Button text to update existing prompt"
+  },
+  "inputTypeText": "Text",
+  "@inputTypeText": {
+    "description": "Text input type label"
+  },
+  "inputTypeNumber": "Number",
+  "@inputTypeNumber": {
+    "description": "Number input type label"
+  },
+  "inputTypePhoto": "Photo",
+  "@inputTypePhoto": {
+    "description": "Photo input type label"
+  },
+  "inputTypeDate": "Date",
+  "@inputTypeDate": {
+    "description": "Date input type label"
+  },
+  "inputTypeTextDescription": "Free-form text input",
+  "@inputTypeTextDescription": {
+    "description": "Description for text input type"
+  },
+  "inputTypeNumberDescription": "Numeric input only",
+  "@inputTypeNumberDescription": {
+    "description": "Description for number input type"
+  },
+  "inputTypePhotoDescription": "Camera capture",
+  "@inputTypePhotoDescription": {
+    "description": "Description for photo input type"
+  },
+  "inputTypeDateDescription": "Date picker",
+  "@inputTypeDateDescription": {
+    "description": "Description for date input type"
+  },
+  "askModeOnce": "Once per product",
+  "@askModeOnce": {
+    "description": "Ask mode: once per product label"
+  },
+  "askModeEveryS": "Every scan",
+  "@askModeEveryS": {
+    "description": "Ask mode: every scan label"
+  },
+  "askModeOnceDescription": "Ask only the first time a product is scanned",
+  "@askModeOnceDescription": {
+    "description": "Description for once per product ask mode"
+  },
+  "askModeEveryScanDescription": "Ask every time a product is scanned",
+  "@askModeEveryScanDescription": {
+    "description": "Description for every scan ask mode"
+  },
+  "errorSavingPrompt": "Error saving prompt: {error}",
+  "@errorSavingPrompt": {
+    "description": "Error message when saving prompt fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "The error details"
+      }
+    }
+  },
+  "productPrefix": "Product: {productCode}",
+  "@productPrefix": {
+    "description": "Product label with code",
+    "placeholders": {
+      "productCode": {
+        "type": "String",
+        "description": "The product code"
+      }
+    }
+  },
+  "enterQuantity": "Enter Quantity",
+  "@enterQuantity": {
+    "description": "Title for quantity input page"
+  },
+  "next": "Next",
+  "@next": {
+    "description": "Button text to proceed to next step"
+  },
+  "finish": "Finish",
+  "@finish": {
+    "description": "Button text to finish the process"
+  },
+  "required": "Required",
+  "@required": {
+    "description": "Label for required fields"
+  },
+  "optional": "Optional",
+  "@optional": {
+    "description": "Label for optional fields"
+  },
+  "previous": "Previous",
+  "@previous": {
+    "description": "Button text to go to previous step"
+  },
+  "photo": "Photo",
+  "@photo": {
+    "description": "Label for photo section"
+  },
+  "photoPreview": "Photo Preview",
+  "@photoPreview": {
+    "description": "Title for photo preview dialog"
+  },
+  "usePhoto": "Use Photo",
+  "@usePhoto": {
+    "description": "Button text to confirm photo usage"
+  },
+  "retake": "Retake",
+  "@retake": {
+    "description": "Button text to retake a photo"
+  },
+  "failedToLoadImage": "Failed to load image",
+  "@failedToLoadImage": {
+    "description": "Error message when image cannot be loaded"
+  },
+  "takePhoto": "Take Photo",
+  "@takePhoto": {
+    "description": "Button text to take a photo"
+  },
+  "addAnotherPhoto": "Add Another Photo",
+  "@addAnotherPhoto": {
+    "description": "Button text to add another photo"
+  },
+  "enterText": "Enter text",
+  "@enterText": {
+    "description": "Placeholder for text input"
+  },
+  "enterNumber": "Enter number",
+  "@enterNumber": {
+    "description": "Placeholder for number input"
+  },
+  "selectDate": "Select date",
+  "@selectDate": {
+    "description": "Placeholder for date selection"
+  },
+  "pleaseEnterValue": "Please enter a value",
+  "@pleaseEnterValue": {
+    "description": "Validation message for empty required fields"
+  },
+  "exportInformation": "Export Information",
+  "@exportInformation": {
+    "description": "Title for export information screen"
+  },
+  "generateExport": "Generate Export",
+  "@generateExport": {
+    "description": "Button text to generate export"
+  },
+  "generatingExport": "Generating export...",
+  "@generatingExport": {
+    "description": "Loading message while generating export"
+  },
+  "exportCompletedSuccessfully": "Export completed successfully!",
+  "@exportCompletedSuccessfully": {
+    "description": "Success message for completed export"
+  },
+  "exportFailed": "Export failed: {error}",
+  "@exportFailed": {
+    "description": "Error message when export fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "The error details"
+      }
+    }
+  },
+  "exportFormat": "Export Format",
+  "@exportFormat": {
+    "description": "Section title for export format explanation"
+  },
+  "exportDescription": "The export will generate a ZIP file containing:",
+  "@exportDescription": {
+    "description": "Description of export contents"
+  },
+  "productsCsv": "products.csv",
+  "@productsCsv": {
+    "description": "Name of products CSV file"
+  },
+  "productsCsvDescription": "Contains all product information including:",
+  "@productsCsvDescription": {
+    "description": "Description of products CSV contents"
+  },
+  "productId": "Product ID",
+  "@productId": {
+    "description": "Product ID field label"
+  },
+  "createdAtTimestamp": "Created At timestamp",
+  "@createdAtTimestamp": {
+    "description": "Created at timestamp field label"
+  },
+  "updatedAtTimestamp": "Updated At timestamp",
+  "@updatedAtTimestamp": {
+    "description": "Updated at timestamp field label"
+  },
+  "oncePerProductAnswers": "All \"once per product\" prompt question answers",
+  "@oncePerProductAnswers": {
+    "description": "Description for once per product answers in export"
+  },
+  "transactionsCsv": "transactions.csv",
+  "@transactionsCsv": {
+    "description": "Name of transactions CSV file"
+  },
+  "transactionsCsvDescription": "Contains all transaction/scan records including:",
+  "@transactionsCsvDescription": {
+    "description": "Description of transactions CSV contents"
+  },
+  "transactionId": "Transaction ID",
+  "@transactionId": {
+    "description": "Transaction ID field label"
+  },
+  "quantityScanned": "Quantity scanned",
+  "@quantityScanned": {
+    "description": "Quantity scanned field label"
+  },
+  "allPromptAnswers": "All prompt question answers (for each scan)",
+  "@allPromptAnswers": {
+    "description": "Description for all prompt answers in transactions"
+  },
+  "imagesFolder": "images/ folder",
+  "@imagesFolder": {
+    "description": "Name of images folder in export"
+  },
+  "imagesFolderDescription": "Contains all photos captured during scanning:",
+  "@imagesFolderDescription": {
+    "description": "Description of images folder contents"
+  },
+  "photosFromPrompts": "Photos from photo-type prompt questions",
+  "@photosFromPrompts": {
+    "description": "Description of photo prompt images"
+  },
+  "filesReferencedInCsv": "Files referenced in CSV as \"images/filename.jpg\"",
+  "@filesReferencedInCsv": {
+    "description": "Description of how files are referenced"
+  },
+  "originalFilenames": "Original file names preserved",
+  "@originalFilenames": {
+    "description": "Description of filename preservation"
+  },
+  "fileNaming": "File Naming",
+  "@fileNaming": {
+    "description": "Section title for file naming explanation"
+  },
+  "exportFilenamePattern": "Export files are named: inventory_export_YYYYMMDD_HHMMSS.zip",
+  "@exportFilenamePattern": {
+    "description": "Explanation of export filename pattern"
+  },
+  "deleteAllData": "Delete All Data",
+  "@deleteAllData": {
+    "description": "Title for delete all data dialog"
+  },
+  "actionCannotBeUndone": "THIS ACTION CANNOT BE UNDONE!",
+  "@actionCannotBeUndone": {
+    "description": "Warning that action cannot be undone"
+  },
+  "willPermanentlyDelete": "This will permanently delete:",
+  "@willPermanentlyDelete": {
+    "description": "Description of what will be deleted"
+  },
+  "allScannedProducts": "All scanned products",
+  "@allScannedProducts": {
+    "description": "List item: all scanned products"
+  },
+  "allTransactionHistory": "All transaction history",
+  "@allTransactionHistory": {
+    "description": "List item: all transaction history"
+  },
+  "allPromptAnswers": "All prompt answers",
+  "@allPromptAnswers": {
+    "description": "List item: all prompt answers"
+  },
+  "allCustomPromptQuestions": "All custom prompt questions",
+  "@allCustomPromptQuestions": {
+    "description": "List item: all custom prompt questions"
+  },
+  "absolutelySureToContinue": "Are you absolutely sure you want to continue?",
+  "@absolutelySureToContinue": {
+    "description": "Confirmation question for dangerous action"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Button text to cancel action"
+  },
+  "deleteAllCaps": "DELETE ALL",
+  "@deleteAllCaps": {
+    "description": "Button text to confirm deletion (all caps)"
+  },
+  "allDataPermanentlyDeleted": "All data has been permanently deleted",
+  "@allDataPermanentlyDeleted": {
+    "description": "Success message after deleting all data"
+  },
+  "failedToDeleteData": "Failed to delete data: {error}",
+  "@failedToDeleteData": {
+    "description": "Error message when data deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "The error details"
+      }
+    }
+  },
+  "resetAllStocks": "Reset All Stocks",
+  "@resetAllStocks": {
+    "description": "Title for reset all stocks dialog"
+  },
+  "resetAllStocksDescription": "This will create negative transactions to bring all product stocks to zero. The transaction history will be preserved for audit purposes.\n\nAre you sure you want to continue?",
+  "@resetAllStocksDescription": {
+    "description": "Description of what resetting all stocks does"
+  },
+  "resetAll": "Reset All",
+  "@resetAll": {
+    "description": "Button text to reset all stocks"
+  },
+  "allStocksResetToZero": "All stocks have been reset to zero",
+  "@allStocksResetToZero": {
+    "description": "Success message after resetting all stocks"
+  },
+  "resetProductStock": "Reset Product Stock",
+  "@resetProductStock": {
+    "description": "Title for reset product stock dialog"
+  },
+  "resetProductStockDescription": "This will create a negative transaction to bring the stock of \"{productId}\" to zero. The transaction history will be preserved for audit purposes.\n\nAre you sure you want to continue?",
+  "@resetProductStockDescription": {
+    "description": "Description of what resetting product stock does",
+    "placeholders": {
+      "productId": {
+        "type": "String",
+        "description": "The product ID"
+      }
+    }
+  },
+  "reset": "Reset",
+  "@reset": {
+    "description": "Button text to reset stock"
+  },
+  "stockResetToZero": "Stock for \"{productId}\" has been reset to zero",
+  "@stockResetToZero": {
+    "description": "Success message after resetting product stock",
+    "placeholders": {
+      "productId": {
+        "type": "String",
+        "description": "The product ID"
+      }
+    }
+  },
+  "noTransactionHistoryYet": "No transaction history yet",
+  "@noTransactionHistoryYet": {
+    "description": "Message when product has no transactions"
+  },
+  "scanProductToSeeHistory": "Scan this product to see its transaction history here",
+  "@scanProductToSeeHistory": {
+    "description": "Instruction to scan product to see history"
+  },
+  "stockSummary": "Stock Summary",
+  "@stockSummary": {
+    "description": "Title for stock summary section"
+  },
+  "currentStock": "Current Stock",
+  "@currentStock": {
+    "description": "Label for current stock amount"
+  },
+  "totalTransactions": "Total Transactions",
+  "@totalTransactions": {
+    "description": "Label for total number of transactions"
+  },
+  "positive": "Positive",
+  "@positive": {
+    "description": "Label for positive transactions"
+  },
+  "negative": "Negative",
+  "@negative": {
+    "description": "Label for negative transactions"
+  },
+  "neutral": "Neutral",
+  "@neutral": {
+    "description": "Label for neutral transactions"
+  },
+  "transactionHistory": "Transaction History",
+  "@transactionHistory": {
+    "description": "Title for transaction history section"
+  },
+  "fileNotFound": "File not found",
+  "@fileNotFound": {
+    "description": "Error message when file cannot be found"
+  },
+  "noTransactionsRecordedYet": "No transactions recorded yet",
+  "@noTransactionsRecordedYet": {
+    "description": "Message when no transactions exist"
+  },
+  "startScanningToSeeHistory": "Start scanning products to see transaction history",
+  "@startScanningToSeeHistory": {
+    "description": "Instruction to start scanning to see history"
+  },
+  "export": "Export",
+  "@export": {
+    "description": "Button text for export action"
+  },
+  "noProductsScannedYet": "No products scanned yet.",
+  "@noProductsScannedYet": {
+    "description": "Message when no products have been scanned"
+  },
+  "lastUpdated": "Last updated: {date}",
+  "@lastUpdated": {
+    "description": "Label showing when product was last updated",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "description": "The formatted date"
+      }
+    }
+  },
+  "upgrades": "Upgrades",
+  "@upgrades": {
+    "description": "Title for upgrades screen"
+  },
+  "premiumFeaturesComingSoon": "Premium features coming soon",
+  "@premiumFeaturesComingSoon": {
+    "description": "Message about upcoming premium features"
+  },
+  "takePhoto": "Take Photo",
+  "@takePhoto": {
+    "description": "Button text to take a photo"
+  },
+  "addAnotherPhoto": "Add Another Photo",
+  "@addAnotherPhoto": {
+    "description": "Button text to add another photo"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Button text to save"
+  },
+  "previous": "Previous",
+  "@previous": {
+    "description": "Button text to go to previous page"
+  },
+  "failedToSavePhoto": "Failed to save photo",
+  "@failedToSavePhoto": {
+    "description": "Error message when photo save fails"
+  },
+  "cameraError": "Camera error: {error}",
+  "@cameraError": {
+    "description": "Error message for camera issues",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "The error details"
+      }
+    }
+  },
+  "errorSavingTransaction": "Error saving transaction: {error}",
+  "@errorSavingTransaction": {
+    "description": "Error message when saving transaction fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "The error details"
+      }
+    }
+  },
+  "additions": "Additions",
+  "@additions": {
+    "description": "Label for positive transaction additions"
+  },
+  "reductions": "Reductions",
+  "@reductions": {
+    "description": "Label for negative transaction reductions"
+  },
+  "productInformation": "Product Information",
+  "@productInformation": {
+    "description": "Title for product information dialog"
+  },
+  "resetStocksData": "Reset Stocks / Data",
+  "@resetStocksData": {
+    "description": "Title for reset stocks screen"
+  },
+  "resetAllStocksButton": "Reset All Stocks",
+  "@resetAllStocksButton": {
+    "description": "Button text to reset all stocks"
+  },
+  "resetIndividualStock": "Reset Individual Stock",
+  "@resetIndividualStock": {
+    "description": "Button text to reset individual stock"
+  },
+  "deleteAllDataButton": "Delete All Data",
+  "@deleteAllDataButton": {
+    "description": "Button text to delete all data"
+  },
+  "removeAllData": "Remove All Data",
+  "@removeAllData": {
+    "description": "Title for remove all data section"
+  },
+  "permanentDeletionWarning": "PERMANENT DELETION: This will completely remove all products, transactions, prompt questions, and history. This action cannot be undone.",
+  "@permanentDeletionWarning": {
+    "description": "Warning message for permanent deletion"
+  },
+  "removeAllDataButton": "REMOVE ALL DATA",
+  "@removeAllDataButton": {
+    "description": "Button text to remove all data (caps)"
+  },
+  "stockResetInformation": "Stock Reset Information",
+  "@stockResetInformation": {
+    "description": "Title for stock reset information section"
+  },
+  "stockResetExplanation": "Resetting stocks creates negative transactions that bring each product's stock to zero. This maintains a complete audit trail of all stock movements.",
+  "@stockResetExplanation": {
+    "description": "Explanation of how stock reset works"
+  },
+  "allStocksAtZero": "All stocks are at zero",
+  "@allStocksAtZero": {
+    "description": "Message when all stocks are at zero"
+  },
+  "noProductsToReset": "No products currently have stock to reset",
+  "@noProductsToReset": {
+    "description": "Message when no products need reset"
+  },
+  "resetThisProductStock": "Reset this product stock",
+  "@resetThisProductStock": {
+    "description": "Tooltip for reset product button"
+  },
+  "pleaseEnterValidNumber": "Please enter a valid number",
+  "@pleaseEnterValidNumber": {
+    "description": "Validation message for invalid number"
+  },
+  "productAttributes": "Product Attributes",
+  "@productAttributes": {
+    "description": "Title for product attributes section"
+  },
+  "photos": "Photos",
+  "@photos": {
+    "description": "Title for photos section"
+  },
+  "photosCount": "Photos ({count})",
+  "@photosCount": {
+    "description": "Title for photos section with count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of photos"
+      }
+    }
+  },
+  "errorLoadingPhotos": "Error loading photos: {error}",
+  "@errorLoadingPhotos": {
+    "description": "Error message when photos fail to load",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "The error details"
+      }
+    }
+  },
+  "transactionHistoryTitle": "Transaction History",
+  "@transactionHistoryTitle": {
+    "description": "Title for transaction history section"
+  },
+  "errorLoadingTransactionHistory": "Error loading transaction history: {error}",
+  "@errorLoadingTransactionHistory": {
+    "description": "Error message when transaction history fails to load",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "The error details"
+      }
+    }
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Button text to retry an operation"
+  },
+  "todayAt": "Today at {time}",
+  "@todayAt": {
+    "description": "Time format for today's transactions",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "description": "The formatted time"
+      }
+    }
+  },
+  "stockAddition": "Stock addition",
+  "@stockAddition": {
+    "description": "Description for positive stock transaction"
+  },
+  "stockReduction": "Stock reduction",
+  "@stockReduction": {
+    "description": "Description for negative stock transaction"
+  },
+  "productInformationTitle": "Product Information",
+  "@productInformationTitle": {
+    "description": "Title for product information dialog"
+  },
+  "productIdLabel": "Product ID: {productId}",
+  "@productIdLabel": {
+    "description": "Label showing product ID",
+    "placeholders": {
+      "productId": {
+        "type": "String",
+        "description": "The product ID"
+      }
+    }
+  },
+  "productInfoDescription": "This screen shows the complete transaction history for this product.",
+  "@productInfoDescription": {
+    "description": "Description of product info screen"
+  },
+  "positiveQuantitiesInfo": "• Positive quantities represent stock additions",
+  "@positiveQuantitiesInfo": {
+    "description": "Info about positive quantities"
+  },
+  "negativeQuantitiesInfo": "• Negative quantities represent stock reductions or resets",
+  "@negativeQuantitiesInfo": {
+    "description": "Info about negative quantities"
+  },
+  "currentStockInfo": "• Current stock is the sum of all transactions",
+  "@currentStockInfo": {
+    "description": "Info about current stock calculation"
+  },
+  "photoViewerTitle": "Photo {current} of {total}",
+  "@photoViewerTitle": {
+    "description": "Title for photo viewer dialog",
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "description": "Current photo number"
+      },
+      "total": {
+        "type": "int",
+        "description": "Total number of photos"
+      }
+    }
+  }
+} 

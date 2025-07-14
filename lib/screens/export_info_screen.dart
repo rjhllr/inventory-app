@@ -2,22 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers.dart';
 import '../services/export_service.dart';
+import '../l10n/app_localizations.dart';
 
 class ExportInfoScreen extends ConsumerWidget {
   const ExportInfoScreen({super.key});
 
   Future<void> _handleExport(BuildContext context, ExportService exportService) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       // Show loading dialog
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const AlertDialog(
+        builder: (context) => AlertDialog(
           content: Row(
             children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 16),
-              Text('Generating export...'),
+              const CircularProgressIndicator(),
+              const SizedBox(width: 16),
+              Text(l10n.generatingExport),
             ],
           ),
         ),
@@ -30,8 +32,8 @@ class ExportInfoScreen extends ConsumerWidget {
       if (context.mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Export completed successfully!'),
+          SnackBar(
+            content: Text(l10n.exportCompletedSuccessfully),
             backgroundColor: Colors.green,
           ),
         );
@@ -42,7 +44,7 @@ class ExportInfoScreen extends ConsumerWidget {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Export failed: ${e.toString()}'),
+            content: Text(l10n.exportFailed(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -53,10 +55,11 @@ class ExportInfoScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final exportService = ref.watch(exportServiceProvider);
+    final l10n = AppLocalizations.of(context)!;
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Export Information'),
+        title: Text(l10n.exportInformation),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -69,7 +72,7 @@ class ExportInfoScreen extends ConsumerWidget {
               child: ElevatedButton.icon(
                 onPressed: () => _handleExport(context, exportService),
                 icon: const Icon(Icons.file_download),
-                label: const Text('Generate Export'),
+                label: Text(l10n.generateExport),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
@@ -78,65 +81,65 @@ class ExportInfoScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             const Divider(),
             const SizedBox(height: 16),
-            const Text(
-              'Export Format',
-              style: TextStyle(
+            Text(
+              l10n.exportFormat,
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'The export will generate a ZIP file containing:',
-              style: TextStyle(fontSize: 16),
+            Text(
+              l10n.exportDescription,
+              style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 12),
-            const _ExportItem(
-              title: 'products.csv',
-              description: 'Contains all product information including:',
+            _ExportItem(
+              title: l10n.productsCsv,
+              description: l10n.productsCsvDescription,
               items: [
-                'Product ID',
-                'Created At timestamp',
-                'Updated At timestamp',
-                'All "once per product" prompt question answers',
+                l10n.productId,
+                l10n.createdAtTimestamp,
+                l10n.updatedAtTimestamp,
+                l10n.oncePerProductAnswers,
               ],
             ),
             const SizedBox(height: 16),
-            const _ExportItem(
-              title: 'transactions.csv',
-              description: 'Contains all transaction/scan records including:',
+            _ExportItem(
+              title: l10n.transactionsCsv,
+              description: l10n.transactionsCsvDescription,
               items: [
-                'Transaction ID',
-                'Product ID',
-                'Quantity scanned',
-                'Timestamp',
-                'Created At timestamp',
-                'Updated At timestamp',
-                'All prompt question answers (for each scan)',
+                l10n.transactionId,
+                l10n.productId,
+                l10n.quantityScanned,
+                l10n.timestamp,
+                l10n.createdAtTimestamp,
+                l10n.updatedAtTimestamp,
+                l10n.allPromptAnswers,
               ],
             ),
             const SizedBox(height: 16),
-            const _ExportItem(
-              title: 'images/ folder',
-              description: 'Contains all photos captured during scanning:',
+            _ExportItem(
+              title: l10n.imagesFolder,
+              description: l10n.imagesFolderDescription,
               items: [
-                'Photos from photo-type prompt questions',
-                'Files referenced in CSV as "images/filename.jpg"',
-                'Original file names preserved',
+                l10n.photosFromPrompts,
+                l10n.filesReferencedInCsv,
+                l10n.originalFilenames,
               ],
             ),
             const SizedBox(height: 24),
-            const Text(
-              'File Naming',
-              style: TextStyle(
+            Text(
+              l10n.fileNaming,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Export files are named: inventory_export_YYYYMMDD_HHMMSS.zip',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+            Text(
+              l10n.exportFilenamePattern,
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
             const SizedBox(height: 24), // Bottom padding for scroll
           ],

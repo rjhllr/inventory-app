@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/app_database.dart';
 import '../view_models/settings_vm.dart';
+import '../l10n/app_localizations.dart';
 
 class AddPromptScreen extends ConsumerStatefulWidget {
   final PromptQuestion? question;
@@ -57,8 +58,9 @@ class _AddPromptScreenState extends ConsumerState<AddPromptScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving prompt: $e')),
+          SnackBar(content: Text(l10n.errorSavingPrompt(e.toString()))),
         );
       }
     }
@@ -66,13 +68,14 @@ class _AddPromptScreenState extends ConsumerState<AddPromptScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Prompt' : 'Add Prompt'),
+        title: Text(_isEditing ? l10n.editPrompt : l10n.addPrompt),
         actions: [
           TextButton(
             onPressed: _savePrompt,
-            child: const Text('Save'),
+            child: Text(l10n.save),
           ),
         ],
       ),
@@ -86,14 +89,14 @@ class _AddPromptScreenState extends ConsumerState<AddPromptScreen> {
               // Label field
               TextFormField(
                 controller: _labelController,
-                decoration: const InputDecoration(
-                  labelText: 'Label',
-                  border: OutlineInputBorder(),
-                  helperText: 'This will be shown to users when prompting for input',
+                decoration: InputDecoration(
+                  labelText: l10n.label,
+                  border: const OutlineInputBorder(),
+                  helperText: l10n.labelHelperText,
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a label';
+                    return l10n.pleaseEnterLabel;
                   }
                   return null;
                 },
@@ -103,12 +106,12 @@ class _AddPromptScreenState extends ConsumerState<AddPromptScreen> {
               
               // Input Type Section
               Text(
-                'Input Type',
+                l10n.inputType,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
               Text(
-                'Select what type of input users will provide:',
+                l10n.selectInputTypeDescription,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[600],
                 ),
@@ -120,12 +123,12 @@ class _AddPromptScreenState extends ConsumerState<AddPromptScreen> {
               
               // Ask Mode Section
               Text(
-                'Ask Mode',
+                l10n.askMode,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
               Text(
-                'Choose when to ask this question:',
+                l10n.chooseAskModeDescription,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[600],
                 ),
@@ -138,8 +141,8 @@ class _AddPromptScreenState extends ConsumerState<AddPromptScreen> {
               // Prefill option
               Card(
                 child: SwitchListTile(
-                  title: const Text('Prefill last input'),
-                  subtitle: const Text('Automatically populate with the last entered value'),
+                  title: Text(l10n.prefillLastInput),
+                  subtitle: Text(l10n.prefillLastInputDescription),
                   value: _prefillLastInput,
                   onChanged: (value) => setState(() => _prefillLastInput = value),
                 ),
@@ -155,7 +158,7 @@ class _AddPromptScreenState extends ConsumerState<AddPromptScreen> {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: Text(_isEditing ? 'Update Prompt' : 'Add Prompt'),
+                  child: Text(_isEditing ? l10n.updatePrompt : l10n.addPrompt),
                 ),
               ),
             ],
@@ -276,28 +279,30 @@ class _AddPromptScreenState extends ConsumerState<AddPromptScreen> {
   }
 
   String _getInputTypeLabel(InputType type) {
+    final l10n = AppLocalizations.of(context)!;
     switch (type) {
       case InputType.text:
-        return 'Text';
+        return l10n.inputTypeText;
       case InputType.number:
-        return 'Number';
+        return l10n.inputTypeNumber;
       case InputType.photo:
-        return 'Photo';
+        return l10n.inputTypePhoto;
       case InputType.date:
-        return 'Date';
+        return l10n.inputTypeDate;
     }
   }
 
   String _getInputTypeDescription(InputType type) {
+    final l10n = AppLocalizations.of(context)!;
     switch (type) {
       case InputType.text:
-        return 'Free-form text input';
+        return l10n.inputTypeTextDescription;
       case InputType.number:
-        return 'Numeric input only';
+        return l10n.inputTypeNumberDescription;
       case InputType.photo:
-        return 'Camera capture';
+        return l10n.inputTypePhotoDescription;
       case InputType.date:
-        return 'Date picker';
+        return l10n.inputTypeDateDescription;
     }
   }
 
@@ -311,20 +316,22 @@ class _AddPromptScreenState extends ConsumerState<AddPromptScreen> {
   }
 
   String _getAskModeLabel(AskMode mode) {
+    final l10n = AppLocalizations.of(context)!;
     switch (mode) {
       case AskMode.once:
-        return 'Once per product';
+        return l10n.askModeOnce;
       case AskMode.every_scan:
-        return 'Every scan';
+        return l10n.askModeEveryS;
     }
   }
 
   String _getAskModeDescription(AskMode mode) {
+    final l10n = AppLocalizations.of(context)!;
     switch (mode) {
       case AskMode.once:
-        return 'Ask only the first time a product is scanned';
+        return l10n.askModeOnceDescription;
       case AskMode.every_scan:
-        return 'Ask every time a product is scanned';
+        return l10n.askModeEveryScanDescription;
     }
   }
 } 

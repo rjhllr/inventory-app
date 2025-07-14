@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:go_router/go_router.dart';
+import '../l10n/app_localizations.dart';
+import '../datetime_utils.dart';
 
 import '../data/app_database.dart';
 import '../view_models/scanning_vm.dart';
@@ -113,10 +114,11 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
   @override
   Widget build(BuildContext context) {
     final transactionsAsync = ref.watch(transactionsStreamProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scanning'),
+        title: Text(l10n.scanning),
         actions: [
           IconButton(
             icon: Icon(
@@ -124,7 +126,7 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
               color: _isFlashOn ? Colors.yellow : null,
             ),
             onPressed: _toggleFlash,
-            tooltip: _isFlashOn ? 'Turn off flash' : 'Turn on flash',
+            tooltip: _isFlashOn ? l10n.turnOffFlash : l10n.turnOnFlash,
           ),
         ],
       ),
@@ -155,7 +157,7 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
                 },
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (e, _) => Center(child: Text(l10n.errorMessage(e.toString()))),
             ),
           ),
         ],
@@ -197,7 +199,7 @@ class _TransactionTile extends ConsumerWidget {
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(transaction.timestamp.toLocal().toString()),
+                  Text(DateTimeUtils.formatDateTime(context, transaction.timestamp.toLocal())),
                   // Show per-scan attributes
                   if (perScanAnswers.isNotEmpty) ...[
                     const SizedBox(height: 4),
@@ -257,7 +259,7 @@ class _TransactionTile extends ConsumerWidget {
           },
           loading: () => ListTile(
             title: Text(transaction.productId),
-            subtitle: Text(transaction.timestamp.toLocal().toString()),
+            subtitle: Text(DateTimeUtils.formatDateTime(context, transaction.timestamp.toLocal())),
             trailing: const SizedBox(
               width: 20,
               height: 20,
@@ -266,14 +268,14 @@ class _TransactionTile extends ConsumerWidget {
           ),
           error: (error, stackTrace) => ListTile(
             title: Text(transaction.productId),
-            subtitle: Text(transaction.timestamp.toLocal().toString()),
+            subtitle: Text(DateTimeUtils.formatDateTime(context, transaction.timestamp.toLocal())),
             trailing: const Icon(Icons.error, color: Colors.red),
           ),
         );
       },
       loading: () => ListTile(
         title: Text(transaction.productId),
-        subtitle: Text(transaction.timestamp.toLocal().toString()),
+        subtitle: Text(DateTimeUtils.formatDateTime(context, transaction.timestamp.toLocal())),
         trailing: const SizedBox(
           width: 20,
           height: 20,
@@ -282,7 +284,7 @@ class _TransactionTile extends ConsumerWidget {
       ),
       error: (error, stackTrace) => ListTile(
         title: Text(transaction.productId),
-        subtitle: Text(transaction.timestamp.toLocal().toString()),
+        subtitle: Text(DateTimeUtils.formatDateTime(context, transaction.timestamp.toLocal())),
         trailing: const Icon(Icons.error, color: Colors.red),
       ),
     );
@@ -393,9 +395,10 @@ class _TransactionPreviewDialogState extends ConsumerState<_TransactionPreviewDi
     );
     
     if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Total count set to $newTotal (${difference > 0 ? '+' : ''}$difference)'),
+          content: Text(l10n.totalCountSetTo(newTotal, '${difference > 0 ? '+' : ''}$difference')),
           backgroundColor: difference > 0 ? Colors.green : Colors.red,
         ),
       );
@@ -406,13 +409,14 @@ class _TransactionPreviewDialogState extends ConsumerState<_TransactionPreviewDi
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const AlertDialog(
+      final l10n = AppLocalizations.of(context)!;
+      return AlertDialog(
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 16),
-            Text('Loading...'),
+            Text(l10n.loading),
           ],
         ),
       );
@@ -421,8 +425,10 @@ class _TransactionPreviewDialogState extends ConsumerState<_TransactionPreviewDi
     final isPositive = _currentEffectiveCount > 0;
     final isNegative = _currentEffectiveCount < 0;
 
+    final l10n = AppLocalizations.of(context)!;
+    
     return AlertDialog(
-      title: const Text('Transaction Details'),
+      title: Text(l10n.transactionDetails),
       content: SizedBox(
         width: double.maxFinite,
         child: Column(
@@ -430,16 +436,16 @@ class _TransactionPreviewDialogState extends ConsumerState<_TransactionPreviewDi
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Product info
-            _InfoRow(label: 'Product', value: widget.transaction.productId),
+            _InfoRow(label: l10n.product, value: widget.transaction.productId),
             _InfoRow(
-              label: 'Timestamp',
-              value: DateFormat('yyyy-MM-dd HH:mm:ss').format(widget.transaction.timestamp.toLocal()),
+              label: l10n.timestamp,
+              value: DateTimeUtils.formatFullDateTime(context, widget.transaction.timestamp.toLocal()),
             ),
-            _InfoRow(label: 'This Transaction', value: '${widget.transaction.quantity > 0 ? '+' : ''}${widget.transaction.quantity}'),
+            _InfoRow(label: l10n.thisTransaction, value: '${widget.transaction.quantity > 0 ? '+' : ''}${widget.transaction.quantity}'),
             
             // Current effective count
             _InfoRow(
-              label: 'Current Total',
+              label: l10n.currentTotal,
               value: _currentEffectiveCount.toString(),
               valueColor: isPositive
                   ? Colors.green
@@ -451,7 +457,7 @@ class _TransactionPreviewDialogState extends ConsumerState<_TransactionPreviewDi
             const SizedBox(height: 20),
             
             // Set new total section
-            const Text('Set New Total Count:', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(l10n.setNewTotalCount, style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -459,17 +465,17 @@ class _TransactionPreviewDialogState extends ConsumerState<_TransactionPreviewDi
                   child: TextField(
                     controller: _totalCountController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       border: OutlineInputBorder(),
-                      labelText: 'Total Count',
-                      hintText: 'Enter desired total',
+                      labelText: l10n.totalCount,
+                      hintText: l10n.enterDesiredTotal,
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton(
                   onPressed: _setNewTotal,
-                  child: const Text('Set'),
+                  child: Text(l10n.set),
                 ),
               ],
             ),
@@ -478,7 +484,7 @@ class _TransactionPreviewDialogState extends ConsumerState<_TransactionPreviewDi
             
             // Attributes
             if (_answers.isNotEmpty) ...[
-              const Text('Attributes:', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('${l10n.attributes}:', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               ..._answers.entries.map((entry) {
                 final question = _questions.firstWhere(
@@ -505,7 +511,7 @@ class _TransactionPreviewDialogState extends ConsumerState<_TransactionPreviewDi
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
+          child: Text(l10n.close),
         ),
       ],
     );
