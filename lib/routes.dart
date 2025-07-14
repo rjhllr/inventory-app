@@ -7,9 +7,10 @@ import 'screens/product_detail_screen.dart';
 import 'screens/scan_results_screen.dart';
 import 'screens/scanning_screen.dart';
 import 'screens/settings_screen.dart';
-import 'screens/upgrades_screen.dart';
 import 'screens/reset_stocks_screen.dart';
 import 'screens/prompt_screen.dart';
+import 'screens/export_info_screen.dart';
+import 'screens/add_prompt_screen.dart';
 import 'data/app_database.dart';
 
 final appRouter = GoRouter(
@@ -55,7 +56,7 @@ final appRouter = GoRouter(
               path: ':id',
               name: 'productDetail',
               builder: (context, state) {
-                final id = state.pathParameters['id']!;
+                final id = Uri.decodeComponent(state.pathParameters['id']!);
                 return ProductDetailScreen(productId: id);
               },
             ),
@@ -67,9 +68,17 @@ final appRouter = GoRouter(
           builder: (context, state) => const ScanResultsScreen(),
         ),
         GoRoute(
-          path: 'upgrades',
-          name: 'upgrades',
-          builder: (context, state) => const UpgradesScreen(),
+          path: 'export-info',
+          name: 'export-info',
+          builder: (context, state) => const ExportInfoScreen(),
+        ),
+        GoRoute(
+          path: 'add-prompt',
+          name: 'add-prompt',
+          builder: (context, state) {
+            final question = state.extra as PromptQuestion?;
+            return AddPromptScreen(question: question);
+          },
         ),
       ],
     ),

@@ -197,19 +197,32 @@ class ScanningVm {
     final questions = await ref.read(promptQuestionsProvider.future);
     final photoQuestions = questions.where((q) => q.inputType == 'photo').toList();
     
+    if (photoQuestions.isEmpty) {
+      return [];
+    }
+    
     final allPhotos = <String>[];
     
-    for (final question in photoQuestions) {
-      final transactions = await dataSource.watchTransactionsForProduct(productId).first;
+    // Fetch transactions only once, not for each photo question
+    final transactions = await dataSource.watchTransactionsForProduct(productId).first;
+    
+    // Process transactions in chronological order (oldest first)
+    for (final transaction in transactions.reversed) {
+      final answers = await dataSource.getAnswersMapForTransaction(transaction.id);
       
-      for (final transaction in transactions) {
-        final answers = await dataSource.getAnswersMapForTransaction(transaction.id);
+      // Check each photo question for this transaction
+      for (final question in photoQuestions) {
         if (answers.containsKey(question.id)) {
           final photoValue = answers[question.id]!;
           if (photoValue.isNotEmpty) {
             // Photos are stored as comma-separated paths
             final photoPaths = photoValue.split(',');
-            allPhotos.addAll(photoPaths);
+            for (final photoPath in photoPaths) {
+              final trimmedPath = photoPath.trim();
+              if (trimmedPath.isNotEmpty && !allPhotos.contains(trimmedPath)) {
+                allPhotos.add(trimmedPath);
+              }
+            }
           }
         }
       }
@@ -239,4 +252,10 @@ final effectiveCountAtTransactionProvider = FutureProvider.autoDispose.family<in
 final categorizedAnswersProvider = FutureProvider.autoDispose.family<Map<String, Map<String, String>>, String>((ref, transactionId) async {
   final scanningVm = ref.watch(scanningVmProvider);
   return await scanningVm.categorizeAnswersForTransaction(transactionId);
+});
+
+// Provider for product photos
+final productPhotosProvider = FutureProvider.autoDispose.family<List<String>, String>((ref, productId) async {
+  final scanningVm = ref.watch(scanningVmProvider);
+  return await scanningVm.getPhotosForProduct(productId);
 }); 

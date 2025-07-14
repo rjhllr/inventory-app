@@ -183,67 +183,129 @@ class ProductDetailScreen extends ConsumerWidget {
       ),
 
       // Photo gallery section
-      FutureBuilder<List<String>>(
-        future: ref.read(scanningVmProvider).getPhotosForProduct(productId),
-        builder: (context, snapshot) {
-          final photos = snapshot.data ?? [];
+      Consumer(
+        builder: (context, ref, child) {
+          final photosAsync = ref.watch(productPhotosProvider(productId));
           
-          if (photos.isEmpty) {
-            return const SizedBox.shrink();
-          }
-          
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Photos',
-                    style: Theme.of(context).textTheme.titleMedium,
+          return photosAsync.when(
+            data: (photos) {
+              if (photos.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Photos (${photos.length})',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        height: 120,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: photos.length,
+                          itemBuilder: (context, index) {
+                            final photoPath = photos[index];
+                            final file = File(photoPath);
+                            final fileExists = file.existsSync();
+                            
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: GestureDetector(
+                                onTap: () => _showPhotoViewer(context, photos, index),
+                                child: Container(
+                                  width: 120,
+                                  height: 120,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Colors.grey[300]!),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: fileExists
+                                        ? Image.file(
+                                            file,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) {
+                                              return Container(
+                                                color: Colors.grey[200],
+                                                child: const Icon(
+                                                  Icons.broken_image,
+                                                  color: Colors.grey,
+                                                ),
+                                              );
+                                            },
+                                          )
+                                        : Container(
+                                            color: Colors.grey[200],
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                const Icon(
+                                                  Icons.image_not_supported,
+                                                  color: Colors.grey,
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  'File not found',
+                                                  style: TextStyle(
+                                                    fontSize: 10,
+                                                    color: Colors.grey[600],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 120,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: photos.length,
-                      itemBuilder: (context, index) {
-                        final photoPath = photos[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: GestureDetector(
-                            onTap: () => _showPhotoViewer(context, photos, index),
-                            child: Container(
-                              width: 120,
-                              height: 120,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.grey[300]!),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: File(photoPath).existsSync()
-                                    ? Image.file(
-                                        File(photoPath),
-                                        fit: BoxFit.cover,
-                                      )
-                                    : Container(
-                                        color: Colors.grey[200],
-                                        child: const Icon(
-                                          Icons.broken_image,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+                ),
+              );
+            },
+            loading: () => const Card(
+              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Photos'),
+                    SizedBox(height: 12),
+                    Center(child: CircularProgressIndicator()),
+                  ],
+                ),
+              ),
+            ),
+            error: (error, stackTrace) => Card(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Photos',
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    Text(
+                      'Error loading photos: $error',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -404,20 +466,71 @@ class ProductDetailScreen extends ConsumerWidget {
                   itemCount: photos.length,
                   itemBuilder: (context, index) {
                     final photoPath = photos[index];
+                    final file = File(photoPath);
+                    final fileExists = file.existsSync();
+                    
                     return Container(
                       padding: const EdgeInsets.all(16),
                       child: Center(
-                        child: File(photoPath).existsSync()
+                        child: fileExists
                             ? Image.file(
-                                File(photoPath),
+                                file,
                                 fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: Colors.grey[200],
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.broken_image,
+                                          color: Colors.grey,
+                                          size: 64,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          'Error loading image',
+                                          style: TextStyle(color: Colors.grey),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          photoPath,
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontSize: 12,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
                               )
                             : Container(
                                 color: Colors.grey[200],
-                                child: const Icon(
-                                  Icons.broken_image,
-                                  color: Colors.grey,
-                                  size: 64,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.image_not_supported,
+                                      color: Colors.grey,
+                                      size: 64,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'File not found',
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      photoPath,
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 12,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
                                 ),
                               ),
                       ),

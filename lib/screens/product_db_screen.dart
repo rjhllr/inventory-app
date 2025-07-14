@@ -26,7 +26,7 @@ class ProductDbScreen extends ConsumerWidget {
                 title: Text(product.id),
                 subtitle: Text('Last updated: ${DateFormat.yMd().add_jms().format(product.updatedAt.toLocal())}'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/products/${product.id}'),
+                onTap: () => context.push('/products/${Uri.encodeComponent(product.id)}'),
               );
             },
           );

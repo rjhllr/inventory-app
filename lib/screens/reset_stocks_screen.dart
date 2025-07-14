@@ -90,35 +90,32 @@ class ResetStocksScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
+                // Remove All Data Button - Most destructive action at the top
                 Card(
                   color: Colors.red.shade50,
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        Icon(Icons.warning, color: Colors.red.shade700, size: 32),
+                        const Icon(Icons.delete_forever, color: Colors.red, size: 32),
                         const SizedBox(height: 8),
-                        Text(
-                          'Reset All Data',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red.shade700,
-                          ),
+                        const Text(
+                          'Remove All Data',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          'Permanently delete all data including products, transactions, and prompt answers. This action cannot be undone.',
+                        const Text(
+                          'PERMANENT DELETION: This will completely remove all products, transactions, and history. This action cannot be undone.',
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.red.shade600),
+                          style: TextStyle(color: Colors.red),
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
                           icon: const Icon(Icons.delete_forever),
-                          label: const Text('Delete All Data'),
+                          label: const Text('REMOVE ALL DATA'),
                           onPressed: () => _handleResetAllData(context, ref),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red.shade700,
+                            backgroundColor: Colors.red,
                             foregroundColor: Colors.white,
                           ),
                         ),
@@ -127,6 +124,7 @@ class ResetStocksScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
+                // Stock Reset Information
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
