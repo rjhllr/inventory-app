@@ -178,5 +178,30 @@
   "positiveQuantitiesInfo": "• Positive Mengen repräsentieren Bestandsaufstockungen",
   "negativeQuantitiesInfo": "• Negative Mengen repräsentieren Bestandsreduzierungen oder Zurücksetzungen",
   "currentStockInfo": "• Aktueller Bestand ist die Summe aller Transaktionen",
-  "photoViewerTitle": "Foto {current} von {total}"
+  "photoViewerTitle": "Foto {current} von {total}",
+  "photoTaken": "Foto aufgenommen",
+  "removePhoto": "Foto entfernen",
+  "viewPhoto": "Foto ansehen",
+  "detailsTab": "Details",
+  "@detailsTab": {
+    "description": "Tab-Bezeichnung für Produktdetails"
+  },
+  "transactionsTab": "Transaktionen",
+  "@transactionsTab": {
+    "description": "Tab-Bezeichnung für Produkttransaktionen"
+  },
+  "seeAll": "Alle anzeigen",
+  "@seeAll": {
+    "description": "Button-Text, um alle Werte für ein Attribut anzuzeigen"
+  },
+  "valuesListTitle": "Werte für {attribute}",
+  "@valuesListTitle": {
+    "description": "Titel für die Ansicht, die alle Werte eines Produktattributs auflistet",
+    "placeholders": {
+      "attribute": {
+        "type": "String",
+        "description": "Die Attributbezeichnung"
+      }
+    }
+  }
 } 

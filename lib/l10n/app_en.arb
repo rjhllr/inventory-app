@@ -828,5 +828,39 @@
         "description": "Total number of photos"
       }
     }
+  },
+  "photoTaken": "Photo taken",
+  "@photoTaken": {
+    "description": "Message shown when photo is successfully taken"
+  },
+  "removePhoto": "Remove Photo",
+  "@removePhoto": {
+    "description": "Button text to remove a photo"
+  },
+  "viewPhoto": "View Photo",
+  "@viewPhoto": {
+    "description": "Button text to view a photo"
+  },
+  "detailsTab": "Details",
+  "@detailsTab": {
+    "description": "Tab label for the product details"
+  },
+  "transactionsTab": "Transactions",
+  "@transactionsTab": {
+    "description": "Tab label for product transactions"
+  },
+  "seeAll": "See all",
+  "@seeAll": {
+    "description": "Button text to see all values for an attribute"
+  },
+  "valuesListTitle": "Values for {attribute}",
+  "@valuesListTitle": {
+    "description": "Title for screen listing all values of a product attribute",
+    "placeholders": {
+      "attribute": {
+        "type": "String",
+        "description": "The attribute label"
+      }
+    }
   }
 } 

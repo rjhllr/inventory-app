@@ -63,6 +63,16 @@ class InventoryApp extends StatelessWidget {
         Locale('de'),
       ],
       routerConfig: appRouter,
+      builder: (context, child) {
+        // Dismiss the keyboard when tapping anywhere outside an input field
+        return GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            FocusManager.instance.primaryFocus?.unfocus();
+          },
+          child: child,
+        );
+      },
     );
   }
 } 

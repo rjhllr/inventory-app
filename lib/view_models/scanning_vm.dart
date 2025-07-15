@@ -159,6 +159,11 @@ class ScanningVm {
           updatedAt: DateTime.now(),
         ),
       );
+      // Skip photo answers as they are shown separately in the gallery and
+      // the raw file paths are not useful in the transaction list.
+      if (question.inputType == 'photo') {
+        continue;
+      }
       
       if (question.askMode == AskMode.every_scan.name) {
         perScanAnswers[entry.key] = entry.value;
@@ -230,6 +235,79 @@ class ScanningVm {
     
     return allPhotos;
   }
+
+  /// Helper method to get grouped counts for "once" attributes across all transactions of a product
+  Future<Map<String, Map<String, int>>> getOnceAttributeValueCountsForProduct(String productId) async {
+    final dataSource = ref.read(dataSourceProvider);
+    final questions = await ref.read(promptQuestionsProvider.future);
+    // Exclude questions of inputType 'photo' as these are handled separately in the gallery.
+    final onceQuestionIds = questions
+        .where((q) => q.askMode == AskMode.once.name && q.inputType != 'photo')
+        .map((q) => q.id)
+        .toSet();
+
+    if (onceQuestionIds.isEmpty) {
+      return {};
+    }
+
+    // Fetch all transactions for the product once
+    final transactions = await dataSource.watchTransactionsForProduct(productId).first;
+
+    final Map<String, Map<String, int>> counts = {};
+
+    for (final transaction in transactions) {
+      final answers = await dataSource.getAnswersMapForTransaction(transaction.id);
+      for (final entry in answers.entries) {
+        final questionId = entry.key;
+        final value = entry.value;
+        if (!onceQuestionIds.contains(questionId)) continue;
+        final valueCounts = counts.putIfAbsent(questionId, () => {});
+        // Sum the transaction quantities instead of counting occurrences so that the
+        // resulting value represents the *quantity* linked to the attribute rather
+        // than the number of transactions containing the attribute.
+        valueCounts[value] = (valueCounts[value] ?? 0) + transaction.quantity;
+      }
+    }
+
+    return counts;
+  }
+
+  /// Helper method to get grouped counts for "per_scan" (every_scan) attributes across all transactions of a product
+  Future<Map<String, Map<String, int>>> getPerScanAttributeValueCountsForProduct(String productId) async {
+    final dataSource = ref.read(dataSourceProvider);
+    final questions = await ref.read(promptQuestionsProvider.future);
+
+    // Only include every_scan attributes that are NOT photos
+    final perScanQuestionIds = questions
+        .where((q) => q.askMode == AskMode.every_scan.name && q.inputType != 'photo')
+        .map((q) => q.id)
+        .toSet();
+
+    if (perScanQuestionIds.isEmpty) {
+      return {};
+    }
+
+    // Fetch all transactions for the product once
+    final transactions = await dataSource.watchTransactionsForProduct(productId).first;
+
+    final Map<String, Map<String, int>> counts = {};
+
+    for (final transaction in transactions) {
+      final answers = await dataSource.getAnswersMapForTransaction(transaction.id);
+      for (final entry in answers.entries) {
+        final questionId = entry.key;
+        final value = entry.value;
+        if (!perScanQuestionIds.contains(questionId)) continue;
+        final valueCounts = counts.putIfAbsent(questionId, () => {});
+        // Sum the transaction quantities instead of counting occurrences so that the
+        // resulting value represents the *quantity* linked to the attribute rather
+        // than the number of individual transactions containing the attribute.
+        valueCounts[value] = (valueCounts[value] ?? 0) + transaction.quantity;
+      }
+    }
+
+    return counts;
+  }
 }
 
 final scanningVmProvider = Provider<ScanningVm>((ref) => ScanningVm(ref));
@@ -258,4 +336,16 @@ final categorizedAnswersProvider = FutureProvider.autoDispose.family<Map<String,
 final productPhotosProvider = FutureProvider.autoDispose.family<List<String>, String>((ref, productId) async {
   final scanningVm = ref.watch(scanningVmProvider);
   return await scanningVm.getPhotosForProduct(productId);
+}); 
+
+// Provider for once attribute value counts per product
+final onceAttributeCountsProvider = FutureProvider.autoDispose.family<Map<String, Map<String, int>>, String>((ref, productId) async {
+  final scanningVm = ref.watch(scanningVmProvider);
+  return scanningVm.getOnceAttributeValueCountsForProduct(productId);
+}); 
+
+// Provider for per_scan attribute value counts per product
+final perScanAttributeCountsProvider = FutureProvider.autoDispose.family<Map<String, Map<String, int>>, String>((ref, productId) async {
+  final scanningVm = ref.watch(scanningVmProvider);
+  return scanningVm.getPerScanAttributeValueCountsForProduct(productId);
 }); 

@@ -588,4 +588,27 @@ class AppLocalizationsDe extends AppLocalizations {
   String photoViewerTitle(int current, int total) {
     return 'Foto $current von $total';
   }
+
+  @override
+  String get photoTaken => 'Foto aufgenommen';
+
+  @override
+  String get removePhoto => 'Foto entfernen';
+
+  @override
+  String get viewPhoto => 'Foto ansehen';
+
+  @override
+  String get detailsTab => 'Details';
+
+  @override
+  String get transactionsTab => 'Transaktionen';
+
+  @override
+  String get seeAll => 'Alle anzeigen';
+
+  @override
+  String valuesListTitle(String attribute) {
+    return 'Werte für $attribute';
+  }
 }

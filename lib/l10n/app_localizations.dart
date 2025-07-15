@@ -1135,6 +1135,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Photo {current} of {total}'**
   String photoViewerTitle(int current, int total);
+
+  /// Message shown when photo is successfully taken
+  ///
+  /// In en, this message translates to:
+  /// **'Photo taken'**
+  String get photoTaken;
+
+  /// Button text to remove a photo
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Photo'**
+  String get removePhoto;
+
+  /// Button text to view a photo
+  ///
+  /// In en, this message translates to:
+  /// **'View Photo'**
+  String get viewPhoto;
+
+  /// Tab label for the product details
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get detailsTab;
+
+  /// Tab label for product transactions
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get transactionsTab;
+
+  /// Button text to see all values for an attribute
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get seeAll;
+
+  /// Title for screen listing all values of a product attribute
+  ///
+  /// In en, this message translates to:
+  /// **'Values for {attribute}'**
+  String valuesListTitle(String attribute);
 }
 
 class _AppLocalizationsDelegate
